@@ -1,0 +1,9 @@
+{
+  "name": "bnmofin-api",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "repository": "https://github.com/hilyafadhilah/bnmofin-api",
+  "author": "Hilya Fadhilah Imania",
+  "license": "MIT",
+  "private": true
+}
