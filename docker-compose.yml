@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DBNAME=bnmofin
+  db:
+    image: postgres:14
+    restart: always
+    ports:
+      - 127.0.0.1:5433:5432
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=bnmofin
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

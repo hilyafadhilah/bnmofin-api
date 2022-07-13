@@ -5,5 +5,33 @@
   "repository": "https://github.com/hilyafadhilah/bnmofin-api",
   "author": "Hilya Fadhilah Imania",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "dev": "nodemon -w src --exec \"ts-node --swc\" src/index.ts",
+    "lint": "eslint src",
+    "build": "tsc",
+    "serve": "node dist/index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "pg": "^8.7.3",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.3.7"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.2.213",
+    "@types/body-parser": "^1.19.2",
+    "@types/express": "^4.17.13",
+    "@types/node": "^18.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.30.6",
+    "@typescript-eslint/parser": "^5.30.6",
+    "eslint": "7.32.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "nodemon": "^2.0.19",
+    "ts-node": "^10.8.2",
+    "typescript": "^4.7.4"
+  }
 }
