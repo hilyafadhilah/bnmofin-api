@@ -6,6 +6,9 @@
   "author": "Hilya Fadhilah Imania",
   "license": "MIT",
   "private": true,
+  "engines": {
+    "node": ">=16.10"
+  },
   "scripts": {
     "dev": "nodemon -w src --exec \"ts-node --swc\" src/index.ts",
     "lint": "eslint src",
