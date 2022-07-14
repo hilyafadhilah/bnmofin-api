@@ -2,9 +2,10 @@ import 'reflect-metadata';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { useExpressServer } from 'routing-controllers';
+import { applicationDefault, initializeApp } from 'firebase-admin/app';
+import { controllers } from './controllers';
 import { middlewares } from './middlewares';
 import { authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
-import { controllers } from './controllers';
 import dataSource from './data-source';
 import logger from './logger';
 
@@ -22,11 +23,18 @@ useExpressServer(app, {
   defaultErrorHandler: false,
 });
 
-dataSource.initialize()
-  .then(() => {
+const bootstrap = async () => {
+  try {
+    initializeApp({ credential: applicationDefault() });
+    logger.info('Connected to firebase.');
+
+    await dataSource.initialize();
     logger.info('Connected to DB');
+
     app.listen(process.env.APP_PORT ?? 3000);
-  })
-  .catch((err) => {
-    logger.error('Failed to connect to db!', { err });
-  });
+  } catch (err: any) {
+    logger.error('Initialization failed.', err);
+  }
+};
+
+bootstrap();
