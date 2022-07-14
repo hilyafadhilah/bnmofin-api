@@ -60,34 +60,34 @@ HTTP error response code: `401`
 - Path: `/auth`
 - Method: `POST`
 
-Request Body
+- Request Body
 
-```typescript
-{
-  username: string,
-  password: string,
-}
-```
+  ```typescript
+  {
+    username: string,
+    password: string,
+  }
+  ```
 
-Response (HTTP `200`)
+- Response (HTTP `200`)
 
-```typescript
-{
-  token: string,
-  user: {
-    id: string,
-	  username: string,
-	  role: Role,
-  },
-}
-```
+  ```typescript
+  {
+    token: string,
+    user: {
+      id: string,
+      username: string,
+      role: Role,
+    },
+  }
+  ```
 
-Errors
+- Errors
 
-| HTTP code | Error name          | Data       | Description        |
-| --------- | ------------------- | ---------- | ------------------ |
-| `404`     | `USERNAME_NOTFOUND` | `username` | Username not found |
-| `401`     | `WRONG_PASSWORD`    |            | Wrong password     |
+  | HTTP code | Error name          | Data       | Description        |
+  | --------- | ------------------- | ---------- | ------------------ |
+  | `404`     | `USERNAME_NOTFOUND` | `username` | Username not found |
+  | `401`     | `WRONG_PASSWORD`    |            | Wrong password     |
 
 
 #### Get Current User
@@ -95,15 +95,15 @@ Errors
 - Path: `/auth`
 - Method: `GET`
 
-Response (HTTP `200`)
+- Response (HTTP `200`)
 
-```typescript
-{
-  id: string,
-  username: string,
-  role: Role,
-}
-```
+  ```typescript
+  {
+    id: string,
+    username: string,
+    role: Role,
+  }
+  ```
 
 
 ### Customer
@@ -113,37 +113,37 @@ Response (HTTP `200`)
 - Path: `/customer`
 - Method: `POST`
 
-Request Body
+- Request Body
 
-```typescript
-{
-  fullname: string,
-  idCardImage: File,
-  user: {
-    username: string,
-    password: string,
-  },
-}
-```
+  ```typescript
+  {
+    fullname: string,
+    idCardImage: File,
+    user: {
+      username: string,
+      password: string,
+    },
+  }
+  ```
 
-Response (HTTP `200`)
+- Response (HTTP `200`)
 
-```typescript
-{
-  id: number,
-  fullname: string,
-  idCardImage: File,
-  user: {
+  ```typescript
+  {
     id: number,
-    username: string,
-    role: string,
-  },
-}
-```
+    fullname: string,
+    idCardImage: File,
+    user: {
+      id: number,
+      username: string,
+      role: string,
+    },
+  }
+  ```
 
-Errors
+- Errors
 
-| HTTP code | Error name          | Data       | Description             |
-| --------- | ------------------- | ---------- | ----------------------- |
-| `400`     | `USERNAME_TAKEN`    | `username` | Username already exists |
+  | HTTP code | Error name          | Data       | Description             |
+  | --------- | ------------------- | ---------- | ----------------------- |
+  | `400`     | `USERNAME_TAKEN`    | `username` | Username already exists |
 
