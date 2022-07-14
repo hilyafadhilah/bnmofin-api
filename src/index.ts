@@ -25,7 +25,7 @@ useExpressServer(app, {
 dataSource.initialize()
   .then(() => {
     logger.info('Connected to DB');
-    app.listen(3000);
+    app.listen(process.env.APP_PORT ?? 3000);
   })
   .catch((err) => {
     logger.error('Failed to connect to db!', { err });

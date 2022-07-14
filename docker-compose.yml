@@ -3,17 +3,20 @@ services:
   app:
     build: .
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
+      - APP_PORT=${APP_PORT:-3000}
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_HOST=db
       - DB_PORT=5432
       - DB_DBNAME=bnmofin
+    ports:
+      - ${APP_PORT:-3000}:${APP_PORT:-3000}
   db:
     image: postgres:14
     restart: always
     ports:
-      - 127.0.0.1:5433:5432
+      - 127.0.0.1:${DB_LOCALPORT:-5433}:5432
     expose:
       - 5432
     environment:
