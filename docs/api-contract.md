@@ -125,6 +125,7 @@ HTTP error response code: `401`
     },
   }
   ```
+  > Accepted file types: JPEG, PNG, GIF
 
 - Response (HTTP `200`)
 

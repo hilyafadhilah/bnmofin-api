@@ -7,7 +7,6 @@ export namespace IdCardUploadConfig {
     'image/png',
     'image/jpeg',
     'image/gif',
-    'image/bmp',
   ];
 
   export const options: Options = {
