@@ -12,6 +12,9 @@ export namespace IdCardUploadConfig {
 
   export const multerOptions: Options = {
     dest: path.join(os.tmpdir(), 'IdCards'),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5 MB
+    },
     fileFilter(req, file, callback) {
       callback(null, acceptedTypes.includes(file.mimetype));
     },
