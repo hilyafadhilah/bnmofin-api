@@ -1,8 +1,10 @@
 import {
   IsEnum,
-  IsInt, IsPositive, IsString, Length, Matches,
+  IsInt, IsNotEmpty, IsPositive, IsString, Length, Matches,
 } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column, Entity, Index, PrimaryGeneratedColumn,
+} from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -17,13 +19,21 @@ export class User {
   id!: number;
 
   @Column()
+  @Index({ unique: true })
   @IsString()
-  @Length(5, 25)
+  @Length(5, 25, {
+    groups: ['register', 'login'],
+  })
   @Matches(/^[a-zA-Z0-9_]+$/)
   username!: string;
 
   @Column()
-  @IsString()
+  @IsString({
+    groups: ['register', 'login'],
+  })
+  @IsNotEmpty({
+    groups: ['register', 'login'],
+  })
   password!: string;
 
   @Column({

@@ -1,6 +1,7 @@
+import { Type } from 'class-transformer';
 import {
   IsEnum,
-  IsInt, IsNumber, IsPositive, IsString, IsUrl, Length,
+  IsInt, IsNotEmpty, IsNumber, IsObject, IsPositive, IsUrl, ValidateNested,
 } from 'class-validator';
 import {
   Column, Entity, JoinColumn, OneToOne, PrimaryColumn,
@@ -20,12 +21,13 @@ export class Customer {
   id!: number;
 
   @Column()
-  @IsString()
-  @Length(1)
+  @IsNotEmpty({
+    groups: ['register'],
+  })
   fullname!: string;
 
   @Column()
-  @IsString()
+  @IsNotEmpty()
   @IsUrl()
   idCardImage!: string;
 
@@ -46,5 +48,12 @@ export class Customer {
 
   @OneToOne(() => User)
   @JoinColumn({ name: 'id' })
+  @Type(() => User)
+  @IsObject({
+    groups: ['register'],
+  })
+  @ValidateNested({
+    groups: ['register'],
+  })
   user!: User;
 }
