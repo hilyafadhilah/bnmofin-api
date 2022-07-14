@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import dataSource from './data-source';
 import logger from './logger';
 
