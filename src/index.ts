@@ -25,7 +25,10 @@ useExpressServer(app, {
 
 const bootstrap = async () => {
   try {
-    initializeApp({ credential: applicationDefault() });
+    initializeApp({
+      credential: applicationDefault(),
+      storageBucket: process.env.GOOGLE_STORAGE_BUCKET,
+    });
     logger.info('Connected to firebase.');
 
     await dataSource.initialize();

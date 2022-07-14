@@ -7,6 +7,8 @@ import { User } from '../entities/user';
 import { hashPassword } from '../utils/auth-utils';
 import { AppError } from '../models/error';
 import { ErrorName } from '../errors';
+import { replaceFilename, uploadFile } from '../utils/fileupload-utils';
+import { IdCardUploadConfig } from '../config/fileupload-config';
 
 @JsonController('/user')
 export class UserController {
@@ -14,9 +16,20 @@ export class UserController {
 
   @Post('/')
   async register(
-  @Body({ required: true, validate: { groups: ['register'] } }) data: Customer,
-    @UploadedFile('idCardImage', { required: true }) file: Express.Multer.File,
-  ) {
+
+    @Body({
+      required: true,
+      validate: { groups: ['register'] },
+    })
+    data: Customer,
+
+    @UploadedFile('idCardImage', {
+      required: true,
+      options: IdCardUploadConfig.multerOptions,
+    })
+    file: Express.Multer.File,
+
+  ): Promise<Customer> {
     let customer: Customer;
 
     await this.em.transaction(async (em) => {
@@ -29,11 +42,16 @@ export class UserController {
       user.password = await hashPassword(user.password);
       user = await em.save(User, user);
 
+      const uploadedFile = await uploadFile(
+        file.path,
+        `IdCards/${replaceFilename(file.originalname, user.id.toString())}`,
+      );
+
       customer = {
         ...data,
         user,
         id: user.id,
-        idCardImage: file.originalname,
+        idCardImage: uploadedFile.name,
         balance: 0,
       };
       customer = await em.save(Customer, customer);

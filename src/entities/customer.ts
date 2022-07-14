@@ -46,7 +46,7 @@ export class Customer {
   @IsNumber({ allowInfinity: false, allowNaN: false })
   balance!: number;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'id' })
   @Type(() => User)
   @IsObject({
