@@ -18,7 +18,7 @@ export class Customer {
   @PrimaryColumn()
   @IsInt()
   @IsPositive()
-  id!: number;
+  userId!: number;
 
   @Column()
   @IsNotEmpty({
@@ -47,7 +47,7 @@ export class Customer {
   balance!: number;
 
   @OneToOne(() => User, { cascade: true })
-  @JoinColumn({ name: 'id' })
+  @JoinColumn({ name: 'userId' })
   @Type(() => User)
   @IsObject({
     groups: ['register'],

@@ -50,7 +50,7 @@ export class UserController {
       customer = {
         ...data,
         user,
-        id: user.id,
+        userId: user.id,
         idCardImage: uploadedFile.name,
         balance: 0,
       };
