@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { useExpressServer } from 'routing-controllers';
-import { AuthMiddleware, authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
+import { middlewares } from './middlewares';
+import { authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
 import { controllers } from './controllers';
 import dataSource from './data-source';
 import logger from './logger';
@@ -14,9 +15,11 @@ app.use(bodyParser.json());
 
 useExpressServer(app, {
   controllers,
-  middlewares: [AuthMiddleware],
+  middlewares,
   authorizationChecker,
   currentUserChecker,
+  validation: false,
+  defaultErrorHandler: false,
 });
 
 dataSource.initialize()

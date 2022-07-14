@@ -5,6 +5,8 @@ import dataSource from '../data-source';
 import { Customer } from '../entities/customer';
 import { User } from '../entities/user';
 import { hashPassword } from '../utils/auth-utils';
+import { AppError } from '../models/error';
+import { ErrorName } from '../errors';
 
 @JsonController('/user')
 export class UserController {
@@ -18,6 +20,11 @@ export class UserController {
     let customer: Customer;
 
     await this.em.transaction(async (em) => {
+      const dbUser = await em.findOneBy(User, { username: data.user.username });
+      if (dbUser != null) {
+        throw new AppError(ErrorName.USERNAME_TAKEN, { username: data.user.username });
+      }
+
       let user: User = { ...data.user };
       user.password = await hashPassword(user.password);
       user = await em.save(User, user);

@@ -3,20 +3,31 @@ import type { ExpressMiddlewareInterface } from 'routing-controllers';
 import type { AuthorizationChecker } from 'routing-controllers/types/AuthorizationChecker';
 import type { CurrentUserChecker } from 'routing-controllers/types/CurrentUserChecker';
 import type { Request, Response, NextFunction } from 'express';
+import { TokenExpiredError } from 'jsonwebtoken';
 import { decodeToken } from '../utils/auth-utils';
 import { UserRole } from '../entities/user';
+import { AppError } from '../models/error';
+import { ErrorName } from '../errors';
 
 @Middleware({ type: 'before' })
 export class AuthMiddleware implements ExpressMiddlewareInterface {
   async use(req: Request, res: Response, next: NextFunction) {
     const header = req.get('authorization');
 
-    if (header && header.startsWith('Bearer ')) {
-      const token = header.replace('Bearer ', '');
-      res.locals.user = decodeToken(token);
-    }
+    try {
+      if (header && header.startsWith('Bearer ')) {
+        const token = header.replace('Bearer ', '');
+        res.locals.user = decodeToken(token);
+      }
 
-    next();
+      next();
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        next(new AppError(ErrorName.TOKEN_EXPIRED));
+      } else {
+        next(new AppError(ErrorName.TOKEN_INVALID));
+      }
+    }
   }
 }
 
