@@ -10,7 +10,7 @@ export namespace IdCardUploadConfig {
     'image/bmp',
   ];
 
-  export const multerOptions: Options = {
+  export const options: Options = {
     dest: path.join(os.tmpdir(), 'IdCards'),
     limits: {
       fileSize: 5 * 1024 * 1024, // 5 MB

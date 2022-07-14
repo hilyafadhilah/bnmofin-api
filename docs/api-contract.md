@@ -106,9 +106,11 @@ Response (HTTP `200`)
 ```
 
 
+### Customer
+
 #### Register
 
-Path: `/user`
+Path: `/customer`
 Method: `POST`
 
 Request Body

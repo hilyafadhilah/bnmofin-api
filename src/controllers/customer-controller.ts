@@ -10,8 +10,8 @@ import { ErrorName } from '../errors';
 import { replaceFilename, uploadFile } from '../utils/fileupload-utils';
 import { IdCardUploadConfig } from '../config/fileupload-config';
 
-@JsonController('/user')
-export class UserController {
+@JsonController('/customer')
+export class CustomerController {
   private em = dataSource.manager;
 
   @Post('/')
@@ -25,7 +25,7 @@ export class UserController {
 
     @UploadedFile('idCardImage', {
       required: true,
-      options: IdCardUploadConfig.multerOptions,
+      options: IdCardUploadConfig.options,
     })
     file: Express.Multer.File,
 
@@ -33,8 +33,8 @@ export class UserController {
     let customer: Customer;
 
     await this.em.transaction(async (em) => {
-      const dbUser = await em.findOneBy(User, { username: data.user.username });
-      if (dbUser != null) {
+      const existingUser = await em.findOneBy(User, { username: data.user.username });
+      if (existingUser != null) {
         throw new AppError(ErrorName.USERNAME_TAKEN, { username: data.user.username });
       }
 

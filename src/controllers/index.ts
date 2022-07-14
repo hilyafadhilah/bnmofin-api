@@ -1,7 +1,7 @@
 import { AuthController } from './auth-controller';
-import { UserController } from './user-controller';
+import { CustomerController } from './customer-controller';
 
 export const controllers = [
-  UserController,
+  CustomerController,
   AuthController,
 ];
