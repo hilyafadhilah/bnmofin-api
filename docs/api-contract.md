@@ -57,8 +57,8 @@ HTTP error response code: `401`
 
 #### Login
 
-Path: `/auth`
-Method: `POST`
+- Path: `/auth`
+- Method: `POST`
 
 Request Body
 
@@ -92,8 +92,8 @@ Errors
 
 #### Get Current User
 
-Path: `/auth`
-Method: `GET`
+- Path: `/auth`
+- Method: `GET`
 
 Response (HTTP `200`)
 
@@ -110,8 +110,8 @@ Response (HTTP `200`)
 
 #### Register
 
-Path: `/customer`
-Method: `POST`
+- Path: `/customer`
+- Method: `POST`
 
 Request Body
 
