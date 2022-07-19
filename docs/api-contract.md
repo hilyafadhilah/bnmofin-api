@@ -51,6 +51,37 @@ HTTP error response code: `401`
 ---------------------------------------------------------------------------
 
 
+## Collections
+
+Pagination options are specified using **query parameters**,
+alongside search query parameters.
+
+| Parameter  | Value                 | Description               |
+| ---------- | --------------------- | ------------------------- |
+| `page`     | integer >= 1          | Requested page            |
+| `pageSize` | `25 | 50 | 100 | 250` | Number of items in a page |
+
+The returned response is:
+
+```typescript
+{
+  meta: {
+    page: number,
+    pageSize: number,
+    totalItems: number, // regardless of pagination
+    totalPages: number,
+  },
+  data: Array<RequestedResource>
+}
+```
+
+> In this document, endpoints that return collection will be marked
+> as collection and will only specify the return type of the data.
+
+
+---------------------------------------------------------------------------
+
+
 ## Resources
 
 ### Authentication
@@ -131,7 +162,7 @@ HTTP error response code: `401`
 
   ```typescript
   {
-    id: number,
+    userId: number,
     fullname: string,
     idCardImage: File,
     user: {
@@ -148,3 +179,79 @@ HTTP error response code: `401`
   | --------- | ------------------- | ---------- | ----------------------- |
   | `400`     | `USERNAME_TAKEN`    | `username` | Username already exists |
 
+
+### Get Customers
+
+- Path: `/customer`
+- Method: `GET`
+- Authorized roles: `all`
+- Type: **Collection**
+
+- Request Query:
+
+  ```typescript
+  {
+    /* roles: all */
+    userId?: number,
+    username?: string,
+    fullname?: string,
+
+    /* roles: admin */
+    balance?: number,
+    status?: 'verified' | 'unverified',
+  }
+  ```
+
+  > `customer` role can only access `verified` status.
+
+- Response (HTTP `200`)
+
+  ```typescript
+  /* Array of */
+  {
+    /* roles: all */
+    userId: number,
+    fullname: string,
+    user: {
+      username: string,
+    },
+
+    /* roles: admin */
+    balance: number,
+    status: 'verified' | 'unverified',
+    idCardImage: string,
+  }
+  ```
+
+### Get Particular Customer
+
+- Path: `/customer/:userId`
+- Method: `GET`
+- Authorized roles: `all`
+- Type: **Collection**
+
+- Request Param:
+
+  ```typescript
+  {
+    userId: number,
+  }
+  ```
+
+- Response (HTTP `200`)
+
+  ```typescript
+  {
+    /* roles: all */
+    userId: number,
+    fullname: string,
+    user: {
+      username: string,
+    },
+
+    /* roles: admin */
+    balance: number,
+    status: 'verified' | 'unverified',
+    idCardImage: string,
+  }
+  ```

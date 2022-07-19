@@ -1,8 +1,5 @@
 import { DataSource } from 'typeorm';
-import { Customer } from './entities/customer';
-import { Request } from './entities/request';
-import { Transfer } from './entities/transfer';
-import { User } from './entities/user';
+import { entities } from './entities';
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -13,7 +10,7 @@ const dataSource = new DataSource({
   database: process.env.DB_DBNAME,
   synchronize: true,
   logging: true,
-  entities: [User, Customer, Request, Transfer],
+  entities,
   subscribers: [],
   migrations: [],
 });

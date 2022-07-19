@@ -5,7 +5,7 @@ import type { CurrentUserChecker } from 'routing-controllers/types/CurrentUserCh
 import type { Request, Response, NextFunction } from 'express';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { decodeToken } from '../utils/auth-utils';
-import { UserRole } from '../entities/user';
+import { AuthRole } from '../models/auth';
 import { AppError } from '../models/error';
 import { ErrorName } from '../errors';
 
@@ -31,14 +31,9 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
   }
 }
 
-export const authorizationChecker: AuthorizationChecker = async (action, roles: UserRole[]) => {
+export const authorizationChecker: AuthorizationChecker = async (action, roles: AuthRole[]) => {
   const { user } = (action.response as Response).locals;
-
-  if (user && (roles.includes(user.role) || !roles.length)) {
-    return true;
-  }
-
-  return false;
+  return (user && (roles.includes(user.role) || !roles.length));
 };
 
 export const currentUserChecker: CurrentUserChecker = (action) => {

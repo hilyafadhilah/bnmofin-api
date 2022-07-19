@@ -1,11 +1,11 @@
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import {
-  IsEnum,
-  IsInt, IsNotEmpty, IsNumber, IsObject, IsPositive, IsUrl, ValidateNested,
+  IsEnum, IsInt, IsNotEmpty, IsNumber, IsObject, IsPositive, IsUrl, ValidateNested,
 } from 'class-validator';
 import {
-  Column, Entity, JoinColumn, OneToOne, PrimaryColumn,
+  Column, Entity, JoinColumn, OneToOne, PrimaryColumn, RelationId,
 } from 'typeorm';
+import { EntityConfig } from '../config/entity-config';
 import { User } from './user';
 
 export enum CustomerStatus {
@@ -16,13 +16,15 @@ export enum CustomerStatus {
 @Entity({ name: 'Customer' })
 export class Customer {
   @PrimaryColumn()
+  @RelationId((customer: Customer) => customer.user)
   @IsInt()
   @IsPositive()
+  @Expose()
   userId!: number;
 
   @Column()
   @IsNotEmpty({
-    groups: ['register'],
+    groups: ['register', 'query'],
   })
   fullname!: string;
 
@@ -36,24 +38,29 @@ export class Customer {
     enum: CustomerStatus,
     default: CustomerStatus.UNVERIFIED,
   })
-  @IsEnum(CustomerStatus)
+  @IsEnum(CustomerStatus, {
+    groups: ['query'],
+  })
   status!: CustomerStatus;
 
-  @Column({
-    type: 'numeric',
-    precision: 2,
-  })
-  @IsNumber({ allowInfinity: false, allowNaN: false })
+  @Column('numeric', EntityConfig.currencyColumnOptions)
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { groups: ['query'] },
+  )
   balance!: number;
 
   @OneToOne(() => User, { cascade: true })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({
+    name: 'userId',
+    foreignKeyConstraintName: 'FK_CustomerUser',
+  })
   @Type(() => User)
   @IsObject({
-    groups: ['register'],
+    groups: ['register', 'query'],
   })
   @ValidateNested({
-    groups: ['register'],
+    groups: ['register', 'query'],
   })
   user!: User;
 }

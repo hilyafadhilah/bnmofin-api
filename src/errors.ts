@@ -7,9 +7,11 @@ export type ErrorDescriptor = {
 export enum ErrorName {
   SERVER_ERROR = 'SERVER_ERROR',
   INVALID_INPUT = 'INVALID_INPUT',
+  NOT_FOUND = 'NOT_FOUND',
 
   // auth
   UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
   TOKEN_EXPIRED = 'TOKEN_EXPIRED',
   TOKEN_INVALID = 'TOKEN_INVALID',
 
@@ -23,7 +25,7 @@ export enum ErrorName {
 
 export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
   [ErrorName.SERVER_ERROR]: {
-    code: 501,
+    code: 500,
     title: 'Internal Server Error',
     message: () => 'An error occured. Please try again later.',
   },
@@ -32,10 +34,26 @@ export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
     title: 'Invalid Input',
     message: () => 'The input provided was invalid.',
   },
+  [ErrorName.NOT_FOUND]: {
+    code: 404,
+    title: 'Not Found',
+    message: (resource?: string) => (resource
+      ? `${resource} was not found.`
+      : 'The requested resource was not found.'
+    ),
+  },
   [ErrorName.UNAUTHORIZED]: {
     code: 401,
     title: 'Unauthorized',
     message: () => 'You are unauthorized to access this resource.',
+  },
+  [ErrorName.FORBIDDEN]: {
+    code: 403,
+    title: 'Forbidden',
+    message: (data?: { allowed?: string[] }) => (
+      `Insufficient privilege.${
+        data?.allowed ? ` Allowed: ${data.allowed.join(', ')}.` : ''}`
+    ),
   },
   [ErrorName.TOKEN_EXPIRED]: {
     code: 401,

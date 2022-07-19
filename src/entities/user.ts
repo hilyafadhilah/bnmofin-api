@@ -1,6 +1,6 @@
 import {
   IsEnum,
-  IsInt, IsNotEmpty, IsPositive, IsString, Length, Matches,
+  IsInt, IsNotEmpty, IsPositive, Length, Matches,
 } from 'class-validator';
 import {
   Column, Entity, Index, PrimaryGeneratedColumn,
@@ -20,19 +20,18 @@ export class User {
 
   @Column()
   @Index({ unique: true })
-  @IsString()
   @Length(5, 25, {
-    groups: ['register', 'login'],
+    groups: ['register', 'login', 'query'],
   })
   @Matches(/^[a-zA-Z0-9_]+$/)
   username!: string;
 
   @Column()
-  @IsString({
-    groups: ['register', 'login'],
-  })
   @IsNotEmpty({
-    groups: ['register', 'login'],
+    groups: ['login'],
+  })
+  @Length(5, 30, {
+    groups: ['register'],
   })
   password!: string;
 
@@ -41,6 +40,8 @@ export class User {
     enum: UserRole,
     default: UserRole.CUSTOMER,
   })
-  @IsEnum(UserRole)
+  @IsEnum(UserRole, {
+    groups: ['query'],
+  })
   role!: UserRole;
 }

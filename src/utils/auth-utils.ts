@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
-import { User } from '../entities/user';
+import { instanceToPlain } from 'class-transformer';
 import { AuthUser } from '../models/auth';
 
 export const hashPassword = async (password: string) => {
@@ -13,21 +13,12 @@ export const comparePassword = async (input: string, hashed: string) => (
   bcrypt.compare(input, hashed)
 );
 
-export const generateToken = (user: User) => {
-  const payload: AuthUser = {
-    id: user.id,
-    username: user.username,
-    role: user.role,
-  };
+export const generateToken = (payload: AuthUser) => (
+  jwt.sign(instanceToPlain(payload), process.env.TOKEN_KEY!, { expiresIn: '1h' })
+);
 
-  return jwt.sign(payload, process.env.TOKEN_KEY!, { expiresIn: '1h' });
-};
-
-export const decodeToken = (token: string) => {
-  const decoded = jwt.verify(token, process.env.TOKEN_KEY!) as JwtPayload;
-  return {
-    id: decoded.id,
-    username: decoded.username,
-    role: decoded.role,
-  } as AuthUser;
+export const decodeToken = (token: string): AuthUser => {
+  const { id, username, role } = jwt.verify(token, process.env.TOKEN_KEY!) as JwtPayload;
+  console.log({ id, username, role });
+  return { id, username, role };
 };

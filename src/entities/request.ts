@@ -1,9 +1,11 @@
+import { Expose, Type } from 'class-transformer';
 import {
-  IsEnum, IsInt, IsNumber, IsPositive,
+  IsEnum, IsIn, IsInstance, IsInt, IsNumber, IsPositive, ValidateNested,
 } from 'class-validator';
 import {
-  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
+  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId,
 } from 'typeorm';
+import { EntityConfig } from '../config/entity-config';
 import { Customer } from './customer';
 
 export enum RequestStatus {
@@ -17,22 +19,36 @@ export class Request {
   @PrimaryGeneratedColumn('identity')
   @IsInt()
   @IsPositive()
+  @Expose()
+  @Type(() => Number)
   id!: number;
 
   @ManyToOne(() => Customer, { nullable: false })
-  @JoinColumn({ name: 'customerId' })
+  @JoinColumn({
+    name: 'customerId',
+    foreignKeyConstraintName: 'FK_RequestCustomer',
+  })
+  @IsInstance(Customer, { groups: ['query'] })
+  @ValidateNested({ groups: ['query'] })
+  @Expose()
+  @Type(() => Customer)
   customer!: Customer;
 
   @Column()
+  @RelationId((request: Request) => request.customer)
   @IsInt()
   @IsPositive()
+  @Expose()
+  @Type(() => Number)
   customerId!: number;
 
-  @Column({
-    type: 'numeric',
-    precision: 2,
-  })
-  @IsNumber({ allowInfinity: false, allowNaN: false })
+  @Column('numeric', EntityConfig.currencyColumnOptions)
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { groups: ['post', 'query'] },
+  )
+  @Expose()
+  @Type(() => Number)
   amount!: number;
 
   @Column({
@@ -40,6 +56,13 @@ export class Request {
     enum: RequestStatus,
     default: RequestStatus.AWAITING,
   })
-  @IsEnum(RequestStatus)
+  @IsEnum(RequestStatus, {
+    groups: ['updateStatus', 'query'],
+  })
+  @IsIn(
+    [RequestStatus.ACCEPTED, RequestStatus.DECLINED],
+    { groups: ['updateStatus'] },
+  )
+  @Expose()
   status!: RequestStatus;
 }

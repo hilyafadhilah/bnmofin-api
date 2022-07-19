@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import { useExpressServer } from 'routing-controllers';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { controllers } from './controllers';
-import { middlewares } from './middlewares';
+import { interceptors, middlewares } from './middlewares';
 import { authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
 import dataSource from './data-source';
 import logger from './logger';
@@ -17,10 +17,15 @@ app.use(bodyParser.json());
 useExpressServer(app, {
   controllers,
   middlewares,
+  interceptors,
   authorizationChecker,
   currentUserChecker,
   validation: false,
   defaultErrorHandler: false,
+  defaults: {
+    nullResultCode: 404,
+    undefinedResultCode: 204,
+  },
 });
 
 const bootstrap = async () => {
