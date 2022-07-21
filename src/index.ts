@@ -8,6 +8,7 @@ import { interceptors, middlewares } from './middlewares';
 import { authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
 import dataSource from './data-source';
 import logger from './logger';
+import { startCacher } from './cacher';
 
 const app = express();
 const appPort = process.env.APP_PORT ?? 3030;
@@ -39,6 +40,9 @@ const bootstrap = async () => {
 
     await dataSource.initialize();
     logger.info('Connected to DB.');
+
+    await startCacher();
+    logger.info('Connected to cacher.');
 
     app.listen(appPort);
     logger.info(`Server ready on port ${appPort}.`);
