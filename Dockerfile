@@ -11,6 +11,10 @@ COPY yarn.lock .
 COPY tsconfig.json .
 COPY src src
 
+ARG GOOGLE_APPLICATION_CREDENTIALS
+COPY ${GOOGLE_APPLICATION_CREDENTIALS} .credentials/google.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=.credentials/google.json
+
 RUN yarn; \
     yarn build
 
