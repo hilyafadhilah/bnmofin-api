@@ -23,6 +23,5 @@ export const generateToken = (payload: AuthUser) => (
 
 export const decodeToken = (token: string): AuthUser => {
   const { id, username, role } = jwt.verify(token, tokenKey) as JwtPayload;
-  console.log({ id, username, role });
   return { id, username, role };
 };

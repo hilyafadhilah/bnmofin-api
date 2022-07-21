@@ -24,8 +24,8 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
 
       if (process.env.NODE_ENV !== 'production' && !appError.data) {
         appError.data = error;
-        logger.error({ ...error });
-        console.log(error);
+        logger.error('[non-native error]', error);
+        console.error(error);
       }
     }
 

@@ -17,6 +17,8 @@ axiosInstance.interceptors.response.use((response) => {
   if (response.status === 429) {
     throw new AppError(ErrorName.IdrOnly);
   }
+
+  return response;
 });
 
 export const cacheKeys = {
@@ -67,7 +69,6 @@ export async function getSymbolsList() {
 
 export async function convert(amount: number, from: string, to: string) {
   const symbols = await getSymbolsList();
-  console.log(symbols);
 
   if (!symbols.includes(from) || !symbols.includes(to)) {
     throw new AppError(ErrorName.InvalidInput);
