@@ -15,6 +15,7 @@ const appPort = process.env.APP_PORT ?? 3030;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.disable('x-powered-by');
 
 useExpressServer(app, {
   controllers,
