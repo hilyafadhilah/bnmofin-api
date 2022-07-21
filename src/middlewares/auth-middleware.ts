@@ -23,9 +23,9 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
       next();
     } catch (err) {
       if (err instanceof TokenExpiredError) {
-        next(new AppError(ErrorName.TOKEN_EXPIRED));
+        next(new AppError(ErrorName.TokenExpired));
       } else {
-        next(new AppError(ErrorName.TOKEN_INVALID));
+        next(new AppError(ErrorName.InvalidToken));
       }
     }
   }

@@ -9,9 +9,9 @@ import { EntityConfig } from '../config/entity-config';
 import { Customer } from './customer';
 
 export enum RequestStatus {
-  ACCEPTED = 'accepted',
-  DECLINED = 'declined',
-  AWAITING = 'awaiting',
+  Accepted = 'accepted',
+  Declined = 'declined',
+  Awaiting = 'awaiting',
 }
 
 @Entity({ name: 'Request' })
@@ -54,13 +54,13 @@ export class Request {
   @Column({
     type: 'enum',
     enum: RequestStatus,
-    default: RequestStatus.AWAITING,
+    default: RequestStatus.Awaiting,
   })
   @IsEnum(RequestStatus, {
     groups: ['updateStatus', 'query'],
   })
   @IsIn(
-    [RequestStatus.ACCEPTED, RequestStatus.DECLINED],
+    [RequestStatus.Accepted, RequestStatus.Declined],
     { groups: ['updateStatus'] },
   )
   @Expose()

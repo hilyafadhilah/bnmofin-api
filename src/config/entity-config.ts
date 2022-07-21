@@ -3,7 +3,7 @@ import type { ColumnNumericOptions } from 'typeorm/decorator/options/ColumnNumer
 
 export namespace EntityConfig {
   export const currencyColumnOptions: ColumnCommonOptions & ColumnNumericOptions = {
-    precision: 15,
+    precision: 21,
     scale: 6,
     transformer: {
       from: (value: any) => parseFloat(value),

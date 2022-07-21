@@ -31,21 +31,21 @@ export class AuthController {
     const user = await this.em.findOneBy(User, { username: data.username });
 
     if (!user) {
-      throw new AppError(ErrorName.USERNAME_NOTFOUND, { username: data.username });
+      throw new AppError(ErrorName.NotFound, `Username "${data.username}"`);
     }
 
     if (!await comparePassword(data.password, user.password)) {
-      throw new AppError(ErrorName.WRONG_PASSWORD);
+      throw new AppError(ErrorName.WrongPassword);
     }
 
     let role = AuthRole.Any;
 
-    if (user.role === UserRole.ADMIN) {
+    if (user.role === UserRole.Admin) {
       role = AuthRole.Admin;
-    } else if (user.role === UserRole.CUSTOMER) {
+    } else if (user.role === UserRole.Customer) {
       const customer = await this.em.findOneByOrFail(Customer, { userId: user.id });
 
-      if (customer.status === CustomerStatus.VERIFIED) {
+      if (customer.status === CustomerStatus.Verified) {
         role = AuthRole.VerifiedCustomer;
       } else {
         role = AuthRole.Customer;

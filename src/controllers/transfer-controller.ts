@@ -56,7 +56,7 @@ export class TransferController {
 
     if (user.role === AuthRole.VerifiedCustomer) {
       if (query.receiver != null && query.sender != null) {
-        throw new AppError(ErrorName.FORBIDDEN);
+        throw new AppError(ErrorName.Forbidden);
       }
 
       where = [];
@@ -104,19 +104,26 @@ export class TransferController {
     user: AuthUser,
   ) {
     if (data.receiverId === user.id) {
-      throw new AppError(ErrorName.INVALID_INPUT);
+      throw new AppError(ErrorName.InvalidInput);
     }
 
     let transfer: Transfer;
+
     await this.em.transaction(async (em) => {
+      const sender = await em.findOneByOrFail(Customer, { userId: user.id });
+
+      if (sender.balance < data.amount) {
+        throw new AppError(ErrorName.InvalidInput);
+      }
+
       const receiver = await em.findOneBy(Customer, { userId: data.receiverId });
 
       if (!receiver) {
-        throw new AppError(ErrorName.NOT_FOUND, 'Receiver');
+        throw new AppError(ErrorName.NotFound, 'Receiver');
       }
 
-      if (receiver.status === CustomerStatus.UNVERIFIED) {
-        throw new AppError(ErrorName.INVALID_INPUT);
+      if (receiver.status === CustomerStatus.Unverified) {
+        throw new AppError(ErrorName.InvalidInput);
       }
 
       transfer = em.create(Transfer, {
@@ -126,13 +133,16 @@ export class TransferController {
       });
 
       await em.save(transfer);
-
-      const sender = await em.findOneBy(Customer, { userId: user.id });
-      sender!.balance -= data.amount;
-      receiver.balance += data.amount;
-
-      await em.save(sender);
-      await em.save(receiver);
+      await em.update(
+        Customer,
+        { userId: sender.userId },
+        { balance: () => `balance - ${data.amount}` },
+      );
+      await em.update(
+        Customer,
+        { userId: receiver.userId },
+        { balance: () => `balance - ${data.amount}` },
+      );
     });
 
     return transfer!;
@@ -147,11 +157,11 @@ export class TransferController {
     const transfer = await this.em.findOneBy(Transfer, { id });
 
     if (!transfer) {
-      throw new AppError(ErrorName.NOT_FOUND, 'Transaction');
+      throw new AppError(ErrorName.NotFound, 'Transaction');
     }
 
     if (transfer.receiverId !== user.id && transfer.senderId !== user.id) {
-      throw new AppError(ErrorName.FORBIDDEN);
+      throw new AppError(ErrorName.Forbidden);
     }
 
     return transfer;

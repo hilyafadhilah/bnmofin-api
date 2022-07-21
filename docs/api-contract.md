@@ -10,8 +10,8 @@
 
 | HTTP code | Error name      | Description                                |
 | --------- | --------------- | ------------------------------------------ |
-| `501`     | `SERVER_ERROR`  | Internal server error                      |
-| `400`     | `INVALID_INPUT` | Request param/body doesn't pass validation |
+| `501`     | `ServerError`  | Internal server error                      |
+| `400`     | `InvalidInput` | Request param/body doesn't pass validation |
 
 #### Error response body
 
@@ -40,9 +40,9 @@ HTTP error response code: `401`
 
 | Error name      | Description        |
 | --------------- | ------------------ |
-| `UNAUTHORIZED`  | Insufficient role  |
-| `TOKEN_EXPIRED` | Token expired      |
-| `TOKEN_INVALID` | Invalid/null token |
+| `Unauthorized`  | Insufficient role  |
+| `TokenExpired` | Token expired      |
+| `InvalidToken` | Invalid/null token |
 
 > If any token is given as headers, it will be checked for validity
 > regardless of the required role for the requested resource.
@@ -118,7 +118,7 @@ The returned response is:
   | HTTP code | Error name          | Data       | Description        |
   | --------- | ------------------- | ---------- | ------------------ |
   | `404`     | `USERNAME_NOTFOUND` | `username` | Username not found |
-  | `401`     | `WRONG_PASSWORD`    |            | Wrong password     |
+  | `401`     | `WrongPassword`    |            | Wrong password     |
 
 
 #### Get Current User
@@ -177,7 +177,7 @@ The returned response is:
 
   | HTTP code | Error name          | Data       | Description             |
   | --------- | ------------------- | ---------- | ----------------------- |
-  | `400`     | `USERNAME_TAKEN`    | `username` | Username already exists |
+  | `400`     | `UsernameTaken`    | `username` | Username already exists |
 
 
 ### Get Customers

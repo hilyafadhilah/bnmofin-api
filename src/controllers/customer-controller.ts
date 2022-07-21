@@ -52,7 +52,7 @@ export class CustomerController {
     await this.em.transaction(async (em) => {
       const existingUser = await em.findOneBy(User, { username: data.user.username });
       if (existingUser != null) {
-        throw new AppError(ErrorName.USERNAME_TAKEN, { username: data.user.username });
+        throw new AppError(ErrorName.UsernameTaken, { username: data.user.username });
       }
 
       let user: User = { ...data.user };
@@ -103,7 +103,7 @@ export class CustomerController {
     if (user.role === AuthRole.VerifiedCustomer
       && (query.balance !== undefined || query.status !== undefined)
     ) {
-      throw new AppError(ErrorName.FORBIDDEN);
+      throw new AppError(ErrorName.Forbidden);
     }
 
     const [customers, count] = await this.em.findAndCount(Customer, {
@@ -126,7 +126,7 @@ export class CustomerController {
   }
 
   @Get('/:id')
-  @Authorized()
+  @Authorized([AuthRole.VerifiedCustomer, AuthRole.Admin])
   async getOne(
     @Param('id') id: number,
     @CurrentUser() user: AuthUser,
@@ -138,7 +138,7 @@ export class CustomerController {
     });
 
     if (!customer) {
-      throw new AppError(ErrorName.NOT_FOUND, 'Customer');
+      throw new AppError(ErrorName.NotFound, 'Customer');
     }
 
     return customer;
@@ -152,11 +152,11 @@ export class CustomerController {
     await this.em.transaction(async (em) => {
       const find = await em.findOneBy(Customer, { userId: id });
       if (!find) {
-        throw new AppError(ErrorName.NOT_FOUND, 'Customer');
+        throw new AppError(ErrorName.NotFound, 'Customer');
       }
 
       customer = find;
-      customer.status = CustomerStatus.VERIFIED;
+      customer.status = CustomerStatus.Verified;
       await em.save(customer);
     });
 

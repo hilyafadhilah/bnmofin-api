@@ -41,7 +41,7 @@ export class RequestController {
     if (user.role === AuthRole.VerifiedCustomer
       && (query.customer != null)
     ) {
-      throw new AppError(ErrorName.FORBIDDEN);
+      throw new AppError(ErrorName.Forbidden);
     }
 
     const options: FindManyOptions<Request> = {
@@ -106,11 +106,11 @@ export class RequestController {
   ) {
     const request = await this.em.findOneBy(Request, { id });
     if (!request) {
-      throw new AppError(ErrorName.NOT_FOUND, 'Request');
+      throw new AppError(ErrorName.NotFound, 'Request');
     }
 
     if (request.customerId !== user.id) {
-      throw new AppError(ErrorName.FORBIDDEN);
+      throw new AppError(ErrorName.Forbidden);
     }
 
     return request;
@@ -136,16 +136,16 @@ export class RequestController {
       const find = await em.findOne(Request, { where: { id } });
 
       if (!find) {
-        throw new AppError(ErrorName.NOT_FOUND, 'Request');
+        throw new AppError(ErrorName.NotFound, 'Request');
       }
 
       request = find;
 
-      if (request.status !== RequestStatus.AWAITING) {
-        throw new AppError(ErrorName.INVALID_INPUT);
+      if (request.status !== RequestStatus.Awaiting) {
+        throw new AppError(ErrorName.InvalidInput);
       }
 
-      if (status === RequestStatus.ACCEPTED) {
+      if (status === RequestStatus.Accepted) {
         await em.update(
           Customer,
           { userId: request.customerId },

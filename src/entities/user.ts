@@ -7,8 +7,8 @@ import {
 } from 'typeorm';
 
 export enum UserRole {
-  ADMIN = 'admin',
-  CUSTOMER = 'customer',
+  Admin = 'admin',
+  Customer = 'customer',
 }
 
 @Entity({ name: 'User' })
@@ -38,7 +38,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.CUSTOMER,
+    default: UserRole.Customer,
   })
   @IsEnum(UserRole, {
     groups: ['query'],

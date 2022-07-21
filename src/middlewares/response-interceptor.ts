@@ -7,7 +7,7 @@ import { AppError } from '../models/error';
 export class ResponseInterceptor implements InterceptorInterface {
   intercept(action: Action, result: any) {
     if (result === null) {
-      throw new AppError(ErrorName.NOT_FOUND);
+      throw new AppError(ErrorName.NotFound);
     }
 
     if (result === undefined) {

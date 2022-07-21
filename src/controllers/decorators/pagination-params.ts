@@ -24,7 +24,7 @@ export function PaginationParams(options?: PaginationParamsOptions) {
       try {
         await validateOrReject(paginationParams);
       } catch (err) {
-        throw new AppError(ErrorName.INVALID_INPUT, err);
+        throw new AppError(ErrorName.InvalidInput, err);
       }
 
       if (!options?.keep) {

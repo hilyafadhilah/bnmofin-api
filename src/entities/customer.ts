@@ -9,8 +9,8 @@ import { EntityConfig } from '../config/entity-config';
 import { User } from './user';
 
 export enum CustomerStatus {
-  VERIFIED = 'verified',
-  UNVERIFIED = 'unverified',
+  Verified = 'verified',
+  Unverified = 'unverified',
 }
 
 @Entity({ name: 'Customer' })
@@ -36,7 +36,7 @@ export class Customer {
   @Column({
     type: 'enum',
     enum: CustomerStatus,
-    default: CustomerStatus.UNVERIFIED,
+    default: CustomerStatus.Unverified,
   })
   @IsEnum(CustomerStatus, {
     groups: ['query'],

@@ -15,11 +15,11 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
       appError = error;
     } else {
       if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
-        appError = new AppError(ErrorName.UNAUTHORIZED);
+        appError = new AppError(ErrorName.Unauthorized);
       } else if (error instanceof BadRequestError) {
-        appError = new AppError(ErrorName.INVALID_INPUT);
+        appError = new AppError(ErrorName.InvalidInput);
       } else {
-        appError = new AppError(ErrorName.SERVER_ERROR);
+        appError = new AppError(ErrorName.ServerError);
       }
 
       if (process.env.NODE_ENV !== 'production' && !appError.data) {
