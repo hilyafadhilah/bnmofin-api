@@ -23,6 +23,9 @@ export enum ErrorName {
 
   // transfer
   InsufficientBalance = 'InsufficientBalance',
+
+  // monetary (Exchange API)
+  IdrOnly = 'IdrOnly',
 }
 
 export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
@@ -78,5 +81,10 @@ export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
     code: 403,
     title: 'Not Enough Balance',
     message: () => 'Your balance is not enough.',
+  },
+  [ErrorName.IdrOnly]: {
+    code: 500,
+    title: 'Please Use IDR',
+    message: () => 'Server is currently unable to do currency data fetching and conversion. Please use IDR (Indonesian Rupiah).',
   },
 };

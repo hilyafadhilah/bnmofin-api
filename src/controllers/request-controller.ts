@@ -2,6 +2,8 @@ import {
   Authorized, Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams,
 } from 'routing-controllers';
 import { FindManyOptions } from 'typeorm';
+import { convert } from '../api/exchange-api';
+import { MoneyConfig } from '../config/money-config';
 import dataSource from '../data-source';
 import { Customer } from '../entities/customer';
 import { Request, RequestStatus } from '../entities/request';
@@ -11,6 +13,7 @@ import { CollectionResponse } from '../models/collection-response';
 import { AppError } from '../models/error';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
+import { NewRequestParams } from './params/request-params';
 
 @JsonController('/request')
 export class RequestController {
@@ -79,11 +82,8 @@ export class RequestController {
   @Authorized(AuthRole.VerifiedCustomer)
   async create(
 
-    @Body({
-      required: true,
-      validate: { groups: ['post'] },
-    })
-    data: Request,
+    @Body({ required: true, validate: true })
+    data: NewRequestParams,
 
     @CurrentUser()
     user: AuthUser,
@@ -91,7 +91,11 @@ export class RequestController {
   ) {
     const request = this.em.create(Request, {
       customerId: user.id,
-      amount: data.amount,
+      amount: await convert(
+        data.money.amount,
+        data.money.currency,
+        MoneyConfig.defaultCurrency,
+      ),
     });
 
     await this.em.save(request);

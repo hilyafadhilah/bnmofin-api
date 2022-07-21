@@ -4,6 +4,19 @@ import { ErrorName } from '../errors';
 import { AppError } from '../models/error';
 import { ExchangeApi, ExchangeApiResponse } from '../models/exchange';
 
+const axiosInstance = axios.create({
+  baseURL: 'https://api.apilayer.com/exchangerates_data',
+  headers: {
+    apikey: process.env.APILAYER_KEY!,
+  },
+});
+
+axiosInstance.interceptors.response.use((response) => {
+  if (response.status === 429) {
+    throw new AppError(ErrorName.IdrOnly);
+  }
+});
+
 export const cacheKeys = {
   symbols: 'currency_symbols',
   convert(from: string, to: string) {
@@ -11,12 +24,17 @@ export const cacheKeys = {
   },
 };
 
-export const axiosInstance = axios.create({
-  baseURL: 'https://api.apilayer.com/exchangerates_data',
-  headers: {
-    apikey: process.env.APILAYER_KEY!,
-  },
-});
+/**
+ * List of symbols
+ *
+ * While yes we are using redis cache, it is still extremely
+ * faster to keep the list of supported symbols in memory
+ * because everytime we convert we are going to check whether
+ * the symbol is supported or not.
+ *
+ * @see convert()
+ */
+const symbolsList: string[] = [];
 
 export async function getSymbols() {
   let symbols = await decache<ExchangeApi.Symbols>(cacheKeys.symbols);
@@ -31,35 +49,53 @@ export async function getSymbols() {
     await encache(cacheKeys.symbols, symbols);
   }
 
-  return symbols!;
+  symbolsList.splice(0);
+  Object.keys(symbols!).forEach((sym) => symbolsList.push(sym));
+
+  return symbols;
+}
+
+export async function getSymbolsList() {
+  if (symbolsList.length === 0) {
+    await getSymbols();
+  }
+
+  return symbolsList;
 }
 
 export async function convert(amount: number, from: string, to: string) {
-  const symbols = await getSymbols();
+  const symbols = await getSymbolsList();
+  console.log(symbols);
 
-  if (!(from in symbols) || !(to in symbols)) {
+  if (!symbols.includes(from) || !symbols.includes(to)) {
     throw new AppError(ErrorName.InvalidInput);
   }
 
-  const key = cacheKeys.convert(from, to);
-  let info = await decache<ExchangeApi.ConvertInfo>(key);
+  let rate = 1.0;
 
-  if (info == null) {
-    const response = await axiosInstance.get<ExchangeApiResponse.Convert>('/convert', {
-      params: {
-        from,
-        to,
-        amount: 1.0,
-      },
-    });
+  if (from !== to) {
+    const key = cacheKeys.convert(from, to);
+    let info = await decache<ExchangeApi.ConvertInfo>(key);
 
-    if (!response.data.success) {
-      throw new AppError(ErrorName.ServerError, response);
+    if (info == null) {
+      const response = await axiosInstance.get<ExchangeApiResponse.Convert>('/convert', {
+        params: {
+          from,
+          to,
+          amount: 1.0,
+        },
+      });
+
+      if (!response.data.success) {
+        throw new AppError(ErrorName.ServerError, response);
+      }
+
+      info = response.data.info;
+      await encache(key, info);
     }
 
-    info = response.data.info;
-    await encache(key, info);
+    rate = info.rate;
   }
 
-  return amount * info!.rate;
+  return amount * rate;
 }
