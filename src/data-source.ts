@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { entities } from './entities';
 
-const dataSource = new DataSource({
+export const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST,
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
@@ -14,5 +14,3 @@ const dataSource = new DataSource({
   subscribers: [],
   migrations: [],
 });
-
-export default dataSource;

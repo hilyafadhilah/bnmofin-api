@@ -2,13 +2,13 @@ import 'reflect-metadata';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { useExpressServer } from 'routing-controllers';
-import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { controllers } from './controllers';
 import { interceptors, middlewares } from './middlewares';
 import { authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
-import dataSource from './data-source';
-import logger from './logger';
-import { startCacher } from './cacher';
+import { dataSource } from './data-source';
+import { logger } from './logger';
+import { initializeCacher } from './cacher';
+import { initializeUploader } from './uploader';
 
 const app = express();
 const appPort = process.env.APP_PORT ?? 3030;
@@ -33,17 +33,14 @@ useExpressServer(app, {
 
 const bootstrap = async () => {
   try {
-    initializeApp({
-      credential: applicationDefault(),
-      storageBucket: process.env.GOOGLE_STORAGE_BUCKET,
-    });
+    initializeUploader();
     logger.info('Connected to firebase.');
 
     await dataSource.initialize();
     logger.info('Connected to DB.');
 
-    await startCacher();
-    logger.info('Connected to cacher.');
+    await initializeCacher();
+    logger.info('Connected to redis.');
 
     app.listen(appPort);
     logger.info(`Server ready on port ${appPort}.`);

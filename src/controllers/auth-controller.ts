@@ -2,7 +2,7 @@ import {
   Authorized,
   Body, CurrentUser, Get, JsonController, Post,
 } from 'routing-controllers';
-import dataSource from '../data-source';
+import { dataSource } from '../data-source';
 import { User, UserRole } from '../entities/user';
 import { AuthUser, Auth, AuthRole } from '../models/auth';
 import { comparePassword, generateToken } from '../utils/auth-utils';

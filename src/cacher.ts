@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import logger from './logger';
+import { logger } from './logger';
 
 const client = createClient({
   url: process.env.REDIS_URL ?? undefined,
@@ -17,7 +17,7 @@ export const defaultCacheExpireTime = process.env.REDIS_EX
   ? parseInt(process.env.REDIS_EX, 10)
   : 6 * 60 * 60; // 6 hours
 
-export function startCacher() {
+export function initializeCacher() {
   return client.connect();
 }
 

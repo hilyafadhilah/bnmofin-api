@@ -5,7 +5,7 @@ const jsonStringify = (obj: any, padding: string = ' ') => {
   return str === '{}' ? '' : padding + str;
 };
 
-const logger = createLogger({
+export const logger = createLogger({
   level: 'info',
   format: format.combine(
     format.timestamp(),
@@ -30,5 +30,3 @@ if (process.env.NODE_ENV !== 'production') {
     ),
   }));
 }
-
-export default logger;

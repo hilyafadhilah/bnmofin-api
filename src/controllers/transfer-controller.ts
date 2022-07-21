@@ -4,7 +4,7 @@ import {
 import { FindOptionsSelect } from 'typeorm';
 import { convert } from '../api/exchange-api';
 import { MoneyConfig } from '../config/money-config';
-import dataSource from '../data-source';
+import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { Transfer } from '../entities/transfer';
 import { ErrorName } from '../errors';

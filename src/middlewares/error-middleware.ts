@@ -4,7 +4,7 @@ import {
 import { Response } from 'express';
 import { AppError } from '../models/error';
 import { ErrorName } from '../errors';
-import logger from '../logger';
+import { logger } from '../logger';
 
 @Middleware({ type: 'after' })
 export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {

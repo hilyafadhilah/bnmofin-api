@@ -4,7 +4,7 @@ import {
 import { FindManyOptions } from 'typeorm';
 import { convert } from '../api/exchange-api';
 import { MoneyConfig } from '../config/money-config';
-import dataSource from '../data-source';
+import { dataSource } from '../data-source';
 import { Customer } from '../entities/customer';
 import { Request, RequestStatus } from '../entities/request';
 import { ErrorName } from '../errors';

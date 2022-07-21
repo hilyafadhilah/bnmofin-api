@@ -2,7 +2,7 @@ import {
   Authorized,
   Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams, UploadedFile,
 } from 'routing-controllers';
-import dataSource from '../data-source';
+import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { User } from '../entities/user';
 import { hashPassword } from '../utils/auth-utils';
