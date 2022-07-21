@@ -4,6 +4,8 @@ import { ErrorName } from '../errors';
 import { AppError } from '../models/error';
 import { ExchangeApi, ExchangeApiResponse } from '../models/exchange';
 
+console.assert(process.env.APILAYER_KEY, 'ApiLayer key is not set.');
+
 const axiosInstance = axios.create({
   baseURL: 'https://api.apilayer.com/exchangerates_data',
   headers: {

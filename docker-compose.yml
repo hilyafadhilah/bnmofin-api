@@ -3,7 +3,6 @@ services:
   app:
     build: .
     environment:
-      - NODE_ENV=${NODE_ENV}
       - APP_PORT=${APP_PORT:-3000}
       - DB_USER=postgres
       - DB_PASSWORD=postgres
