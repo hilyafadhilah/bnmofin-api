@@ -10,6 +10,7 @@ import dataSource from './data-source';
 import logger from './logger';
 
 const app = express();
+const appPort = process.env.APP_PORT ?? 3030;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -37,9 +38,10 @@ const bootstrap = async () => {
     logger.info('Connected to firebase.');
 
     await dataSource.initialize();
-    logger.info('Connected to DB');
+    logger.info('Connected to DB.');
 
-    app.listen(process.env.APP_PORT ?? 3000);
+    app.listen(appPort);
+    logger.info(`Server ready on port ${appPort}.`);
   } catch (err: any) {
     logger.error('Initialization failed.', err);
   }
