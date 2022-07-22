@@ -1,5 +1,5 @@
 import {
-  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams,
+  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams, UseBefore,
 } from 'routing-controllers';
 import { FindManyOptions } from 'typeorm';
 import { convert } from '../api/exchange-api';
@@ -8,14 +8,16 @@ import { dataSource } from '../data-source';
 import { Customer } from '../entities/customer';
 import { Request, RequestStatus } from '../entities/request';
 import { ErrorName } from '../errors';
+import { nameMiddleware } from '../middlewares/name-middleware';
 import { AuthRole, AuthUser } from '../models/auth';
-import { CollectionResponse } from '../models/collection-response';
 import { AppError } from '../models/error';
+import { CollectionResponse } from '../models/responses/collection-response';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
 import { NewRequestParams } from './params/request-params';
 
 @JsonController('/request')
+@UseBefore(nameMiddleware('Request'))
 export class RequestController {
   private em = dataSource.manager;
 
@@ -67,15 +69,11 @@ export class RequestController {
 
     const [requests, count] = await this.em.findAndCount(Request, options);
 
-    return {
-      meta: {
-        page,
-        pageSize,
-        totalItems: count,
-        totalPages: Math.ceil(count / pageSize),
-      },
-      data: requests,
-    };
+    return new CollectionResponse(requests, {
+      page,
+      pageSize,
+      totalItems: count,
+    });
   }
 
   @Post('/')
@@ -103,17 +101,14 @@ export class RequestController {
   }
 
   @Get('/:id')
-  @Authorized()
+  @Authorized([AuthRole.VerifiedCustomer, AuthRole.Admin])
   async getOne(
     @Param('id') id: number,
     @CurrentUser() user: AuthUser,
   ) {
-    const request = await this.em.findOneBy(Request, { id });
-    if (!request) {
-      throw new AppError(ErrorName.NotFound, 'Request');
-    }
+    const request = await this.em.findOneByOrFail(Request, { id });
 
-    if (request.customerId !== user.id) {
+    if (user.role !== AuthRole.Admin && request.customerId !== user.id) {
       throw new AppError(ErrorName.Forbidden);
     }
 
@@ -137,11 +132,7 @@ export class RequestController {
     let request: Request;
 
     await this.em.transaction(async (em) => {
-      const find = await em.findOne(Request, { where: { id } });
-
-      if (!find) {
-        throw new AppError(ErrorName.NotFound, 'Request');
-      }
+      const find = await em.findOneOrFail(Request, { where: { id } });
 
       request = find;
 
@@ -161,8 +152,12 @@ export class RequestController {
       request.status = status;
       await em.save(request);
 
-      // Reload customer. See https://github.com/typeorm/typeorm/issues/3255
-      request.customer = await em.findOneByOrFail(Customer, { userId: request.customerId });
+      try {
+        // Reload customer. See https://github.com/typeorm/typeorm/issues/3255
+        request.customer = await em.findOneByOrFail(Customer, { userId: request.customerId });
+      } catch (err) {
+        throw new AppError(ErrorName.ServerError, err);
+      }
     });
 
     return request!;

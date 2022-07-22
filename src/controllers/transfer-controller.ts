@@ -1,5 +1,5 @@
 import {
-  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, QueryParams,
+  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, QueryParams, UseBefore,
 } from 'routing-controllers';
 import { FindOptionsSelect } from 'typeorm';
 import { convert } from '../api/exchange-api';
@@ -8,14 +8,16 @@ import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { Transfer } from '../entities/transfer';
 import { ErrorName } from '../errors';
+import { nameMiddleware } from '../middlewares/name-middleware';
 import { AuthRole, AuthUser } from '../models/auth';
-import { CollectionResponse } from '../models/collection-response';
 import { AppError } from '../models/error';
+import { CollectionResponse } from '../models/responses/collection-response';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
 import { IssueTransferParams } from './params/transfer-params';
 
 @JsonController('/transfer')
+@UseBefore(nameMiddleware('Transaction'))
 export class TransferController {
   private em = dataSource.manager;
 
@@ -83,15 +85,11 @@ export class TransferController {
       take: pageSize,
     });
 
-    return {
-      meta: {
-        page,
-        pageSize,
-        totalItems: count,
-        totalPages: Math.ceil(count / pageSize),
-      },
-      data: transactions,
-    };
+    return new CollectionResponse(transactions, {
+      page,
+      pageSize,
+      totalItems: count,
+    });
   }
 
   @Post('/')
@@ -161,11 +159,7 @@ export class TransferController {
     @Param('id') id: number,
     @CurrentUser() user: AuthUser,
   ) {
-    const transfer = await this.em.findOneBy(Transfer, { id });
-
-    if (!transfer) {
-      throw new AppError(ErrorName.NotFound, 'Transaction');
-    }
+    const transfer = await this.em.findOneByOrFail(Transfer, { id });
 
     if (transfer.receiverId !== user.id && transfer.senderId !== user.id) {
       throw new AppError(ErrorName.Forbidden);

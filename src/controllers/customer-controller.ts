@@ -1,6 +1,6 @@
 import {
   Authorized,
-  Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams, UploadedFile,
+  Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams, UploadedFile, UseBefore,
 } from 'routing-controllers';
 import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
@@ -13,7 +13,8 @@ import { IdCardUploadConfig } from '../config/fileupload-config';
 import { PaginationOptions } from './params/pagination-options';
 import { PaginationParams } from './decorators/pagination-params';
 import { AuthRole, AuthUser } from '../models/auth';
-import { CollectionResponse } from '../models/collection-response';
+import { CollectionResponse } from '../models/responses/collection-response';
+import { nameMiddleware } from '../middlewares/name-middleware';
 
 const customerSelect = (isAdmin: boolean) => ({
   userId: true,
@@ -27,6 +28,7 @@ const customerSelect = (isAdmin: boolean) => ({
 });
 
 @JsonController('/customer')
+@UseBefore(nameMiddleware('Customer'))
 export class CustomerController {
   private em = dataSource.manager;
 
@@ -114,15 +116,11 @@ export class CustomerController {
       take: pageSize,
     });
 
-    return {
-      meta: {
-        page,
-        pageSize,
-        totalItems: count,
-        totalPages: Math.ceil(count / pageSize),
-      },
-      data: customers,
-    };
+    return new CollectionResponse(customers, {
+      page,
+      pageSize,
+      totalItems: count,
+    });
   }
 
   @Get('/:id')
@@ -131,17 +129,11 @@ export class CustomerController {
     @Param('id') id: number,
     @CurrentUser() user: AuthUser,
   ) {
-    const customer = await this.em.findOne(Customer, {
+    return this.em.findOne(Customer, {
       select: customerSelect(user.role === AuthRole.Admin),
       relations: { user: true },
       where: { userId: id },
     });
-
-    if (!customer) {
-      throw new AppError(ErrorName.NotFound, 'Customer');
-    }
-
-    return customer;
   }
 
   @Put('/:id/verify')
@@ -150,12 +142,7 @@ export class CustomerController {
     let customer: Customer;
 
     await this.em.transaction(async (em) => {
-      const find = await em.findOneBy(Customer, { userId: id });
-      if (!find) {
-        throw new AppError(ErrorName.NotFound, 'Customer');
-      }
-
-      customer = find;
+      customer = await em.findOneByOrFail(Customer, { userId: id });
       customer.status = CustomerStatus.Verified;
       await em.save(customer);
     });
