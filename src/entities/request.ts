@@ -3,7 +3,7 @@ import {
   IsEnum, IsIn, IsInstance, IsInt, IsNumber, IsPositive, ValidateNested,
 } from 'class-validator';
 import {
-  Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId,
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId,
 } from 'typeorm';
 import { EntityConfig } from '../config/entity-config';
 import { Customer } from './customer';
@@ -65,4 +65,7 @@ export class Request {
   )
   @Expose()
   status!: RequestStatus;
+
+  @CreateDateColumn()
+  created!: Date;
 }

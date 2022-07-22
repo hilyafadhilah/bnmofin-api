@@ -50,6 +50,7 @@ export class RequestController {
     }
 
     const options: FindManyOptions<Request> = {
+      order: { created: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     };

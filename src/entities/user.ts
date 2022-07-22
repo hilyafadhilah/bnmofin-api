@@ -3,7 +3,7 @@ import {
   IsInt, IsNotEmpty, IsPositive, Length, Matches,
 } from 'class-validator';
 import {
-  Column, Entity, Index, PrimaryGeneratedColumn,
+  Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn,
 } from 'typeorm';
 
 export enum UserRole {
@@ -44,4 +44,7 @@ export class User {
     groups: ['query'],
   })
   role!: UserRole;
+
+  @CreateDateColumn()
+  created!: Date;
 }

@@ -22,8 +22,10 @@ const customerSelect = (isAdmin: boolean) => ({
   idCardImage: isAdmin,
   balance: isAdmin,
   status: isAdmin,
+  created: isAdmin,
   user: {
     username: true,
+    created: isAdmin,
   },
 });
 

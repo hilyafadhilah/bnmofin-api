@@ -81,6 +81,7 @@ export class TransferController {
       select,
       where: where!,
       relations: { sender: true, receiver: true },
+      order: { created: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
