@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import { useExpressServer } from 'routing-controllers';
 import { controllers } from './controllers';
 import { interceptors, middlewares } from './middlewares';
@@ -15,6 +16,7 @@ const appPort = process.env.APP_PORT ?? 3030;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 app.disable('x-powered-by');
 
 useExpressServer(app, {
