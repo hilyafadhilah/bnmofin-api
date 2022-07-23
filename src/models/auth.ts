@@ -10,9 +10,9 @@ export interface Auth {
 }
 
 export enum AuthRole {
-  None = -1,
-  Any = 0,
-  Customer = 1,
-  VerifiedCustomer = 1.5,
-  Admin = 2,
+  None = 'None',
+  Any = 'Any',
+  Customer = 'Customer',
+  VerifiedCustomer = 'UnverifiedCustomer',
+  Admin = 'Admin',
 }

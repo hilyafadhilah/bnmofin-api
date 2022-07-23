@@ -48,14 +48,17 @@ export class AuthController {
       if (customer.status === CustomerStatus.Verified) {
         role = AuthRole.VerifiedCustomer;
       } else {
-        role = AuthRole.Customer;
+        throw new AppError(ErrorName.UnverifiedAccount);
       }
+    } else {
+      throw new AppError(ErrorName.Unauthorized);
     }
 
     const authUser: AuthUser = {
       id: user.id,
       username: user.username,
       role,
+      created: user.created,
     };
 
     return { token: generateToken(authUser), user: authUser };

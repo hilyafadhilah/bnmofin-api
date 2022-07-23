@@ -33,7 +33,9 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
 
 export const authorizationChecker: AuthorizationChecker = async (action, roles: AuthRole[]) => {
   const { user } = (action.response as Response).locals;
-  return (user && (roles.includes(user.role) || !roles.length));
+  return (user && (
+    roles.includes(user.role) || roles.includes(AuthRole.Any) || !roles.length
+  ));
 };
 
 export const currentUserChecker: CurrentUserChecker = (action) => {

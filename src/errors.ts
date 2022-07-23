@@ -17,6 +17,7 @@ export enum ErrorName {
 
   // login
   WrongPassword = 'WrongPassword',
+  UnverifiedAccount = 'UnverifiedAccount',
 
   // register
   UsernameTaken = 'UsernameTaken',
@@ -71,6 +72,11 @@ export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
     code: 401,
     title: 'Wrong Password',
     message: () => 'Password does not match.',
+  },
+  [ErrorName.UnverifiedAccount]: {
+    code: 401,
+    title: 'Account Not Verified',
+    message: () => 'Your account has not been verified yet.',
   },
   [ErrorName.UsernameTaken]: {
     code: 409,
