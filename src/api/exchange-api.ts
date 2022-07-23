@@ -13,13 +13,16 @@ const axiosInstance = axios.create({
   },
 });
 
-axiosInstance.interceptors.response.use((response) => {
-  if (response.status === 429) {
-    throw new AppError(ErrorName.IdrOnly);
-  }
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 429) {
+      return Promise.reject(new AppError(ErrorName.IdrOnly));
+    }
 
-  return response;
-});
+    return Promise.reject(error);
+  },
+);
 
 export const cacheKeys = {
   symbols: 'currency_symbols',
