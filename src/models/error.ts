@@ -6,12 +6,18 @@ export interface ErrorResponse {
     title: string,
     message: string,
   },
+  meta: {
+    timestamp: Date,
+  },
   data: any,
 }
 
 export class AppError extends Error {
+  public timestamp: Date;
+
   constructor(public name: ErrorName, public data: any = undefined) {
     super();
+    this.timestamp = new Date();
   }
 
   get message() {
@@ -32,6 +38,9 @@ export class AppError extends Error {
         name: this.name,
         title: this.title,
         message: this.message,
+      },
+      meta: {
+        timestamp: this.timestamp,
       },
       data: this.data,
     };
