@@ -57,10 +57,10 @@ export class RequestController {
 
     if (user.role === AuthRole.Admin) {
       options.select = {
-        customer: { fullname: true },
+        customer: { fullname: true, user: { username: true } },
       };
       options.where = query;
-      options.relations = { customer: true };
+      options.relations = { customer: { user: true } };
     } else if (user.role === AuthRole.VerifiedCustomer) {
       options.where = {
         ...query,

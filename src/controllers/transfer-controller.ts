@@ -43,19 +43,10 @@ export class TransferController {
     @CurrentUser()
     user: AuthUser,
   ): Promise<CollectionResponse<Transfer>> {
-    let select: FindOptionsSelect<Transfer> = {};
-
-    if (user.role === AuthRole.Admin) {
-      select = {
-        sender: { userId: true, fullname: true, balance: true },
-        receiver: { userId: true, fullname: true, balance: true },
-      };
-    } else {
-      select = {
-        sender: { userId: true, fullname: true },
-        receiver: { userId: true, fullname: true },
-      };
-    }
+    const select: FindOptionsSelect<Transfer> = {
+      sender: { userId: true, fullname: true, user: { username: true } },
+      receiver: { userId: true, fullname: true, user: { username: true } },
+    };
 
     let where: Transfer | Transfer[];
 
@@ -80,7 +71,7 @@ export class TransferController {
     const [transactions, count] = await this.em.findAndCount(Transfer, {
       select,
       where: where!,
-      relations: { sender: true, receiver: true },
+      relations: { sender: { user: true }, receiver: { user: true } },
       order: { created: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -97,21 +88,28 @@ export class TransferController {
   @Authorized(AuthRole.VerifiedCustomer)
   async transfer(
 
-    @Body({ required: true })
+    @Body({ required: true, validate: true })
     data: IssueTransferParams,
 
     @CurrentUser()
     user: AuthUser,
 
   ) {
-    if (data.receiverId === user.id) {
+    if (data.username === user.username) {
       throw new AppError(ErrorName.InvalidInput);
     }
 
     let transfer: Transfer;
 
     await this.em.transaction(async (em) => {
-      const sender = await em.findOneByOrFail(Customer, { userId: user.id });
+      const sender = await em.findOneOrFail(Customer, {
+        select: {
+          userId: true, fullname: true, balance: true, user: { username: true },
+        },
+        relations: { user: true },
+        where: { userId: user.id },
+      });
+
       const amount = await convert(
         data.money.amount,
         data.money.currency,
@@ -122,7 +120,11 @@ export class TransferController {
         throw new AppError(ErrorName.InvalidInput);
       }
 
-      const receiver = await em.findOneBy(Customer, { userId: data.receiverId });
+      const receiver = await em.findOne(Customer, {
+        select: { userId: true, fullname: true, user: { username: true } },
+        relations: { user: true },
+        where: { user: { username: data.username } },
+      });
 
       if (!receiver) {
         throw new AppError(ErrorName.NotFound, 'Receiver');
@@ -134,8 +136,8 @@ export class TransferController {
 
       transfer = em.create(Transfer, {
         amount,
-        receiverId: data.receiverId,
-        senderId: user.id,
+        receiverId: receiver.userId,
+        senderId: sender.userId,
       });
 
       await em.save(transfer);
@@ -149,6 +151,9 @@ export class TransferController {
         { userId: receiver.userId },
         { balance: () => `balance - ${transfer.amount}` },
       );
+
+      transfer.sender = sender;
+      transfer.receiver = receiver;
     });
 
     return transfer!;

@@ -1,15 +1,13 @@
 import { Expose, Type } from 'class-transformer';
 import {
-  IsInstance, IsInt, IsPositive, ValidateNested,
+  IsInstance, IsNotEmpty, ValidateNested,
 } from 'class-validator';
 import { Money } from '../../models/money';
 
 export class IssueTransferParams {
-  @IsInt()
-  @IsPositive()
-  @Expose()
-  @Type(() => Number)
-  receiverId!: number;
+  @IsNotEmpty()
+  @Type(() => String)
+  username!: string;
 
   @IsInstance(Money)
   @ValidateNested()

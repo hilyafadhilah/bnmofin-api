@@ -4,7 +4,7 @@ import {
 } from 'routing-controllers';
 import { dataSource } from '../data-source';
 import { User, UserRole } from '../entities/user';
-import { AuthUser, Auth, AuthRole } from '../models/auth';
+import { AuthUser, AuthRole } from '../models/auth';
 import { comparePassword, generateToken } from '../utils/auth-utils';
 import { AppError } from '../models/error';
 import { ErrorName } from '../errors';
@@ -27,7 +27,7 @@ export class AuthController {
       validate: { groups: ['login'] },
     })
     data: User,
-  ): Promise<Auth> {
+  ) {
     const user = await this.em.findOneBy(User, { username: data.username });
 
     if (!user) {
@@ -39,11 +39,12 @@ export class AuthController {
     }
 
     let role = AuthRole.Any;
+    let customer: Customer | undefined;
 
     if (user.role === UserRole.Admin) {
       role = AuthRole.Admin;
     } else if (user.role === UserRole.Customer) {
-      const customer = await this.em.findOneByOrFail(Customer, { userId: user.id });
+      customer = await this.em.findOneByOrFail(Customer, { userId: user.id });
 
       if (customer.status === CustomerStatus.Verified) {
         role = AuthRole.VerifiedCustomer;
@@ -61,6 +62,10 @@ export class AuthController {
       created: user.created,
     };
 
-    return { token: generateToken(authUser), user: authUser };
+    return {
+      token: generateToken(authUser),
+      user: authUser,
+      customer,
+    };
   }
 }

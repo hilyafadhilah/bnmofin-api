@@ -132,7 +132,7 @@ export class CustomerController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.em.findOne(Customer, {
-      select: customerSelect(user.role === AuthRole.Admin),
+      select: customerSelect(user.role === AuthRole.Admin || user.id === id),
       relations: { user: true },
       where: { userId: id },
     });

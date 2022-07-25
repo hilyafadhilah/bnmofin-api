@@ -6,13 +6,13 @@ export type AuthUser = Omit<User, 'password' | 'role'> & {
 
 export interface Auth {
   token: string,
-  user: AuthUser
+  user: AuthUser,
 }
 
 export enum AuthRole {
   None = 'None',
   Any = 'Any',
   Customer = 'Customer',
-  VerifiedCustomer = 'UnverifiedCustomer',
+  VerifiedCustomer = 'VerifiedCustomer',
   Admin = 'Admin',
 }
