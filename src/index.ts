@@ -4,8 +4,9 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { useExpressServer } from 'routing-controllers';
 import { controllers } from './controllers';
-import { interceptors, middlewares } from './middlewares';
-import { authorizationChecker, currentUserChecker } from './middlewares/auth-middleware';
+import {
+  interceptors, middlewares, authorizationChecker, currentUserChecker,
+} from './middlewares';
 import { dataSource } from './data-source';
 import { logger } from './logger';
 import { initializeCacher } from './cacher';
@@ -48,6 +49,7 @@ const bootstrap = async () => {
     logger.info(`Server ready on port ${appPort}.`);
   } catch (err: any) {
     logger.error('Initialization failed.', err);
+    process.exitCode = 1;
   }
 };
 

@@ -13,15 +13,19 @@ export interface ErrorResponse {
 }
 
 export class AppError extends Error {
-  public timestamp: Date;
+  public readonly timestamp: Date;
 
-  constructor(public name: ErrorName, public data: any = undefined) {
+  constructor(
+    public readonly name: ErrorName,
+    private readonly messageData: any = undefined,
+    public data: any = undefined,
+  ) {
     super();
     this.timestamp = new Date();
   }
 
   get message() {
-    return errorMapping[this.name].message(this.data);
+    return errorMapping[this.name].message(this.messageData);
   }
 
   get title() {

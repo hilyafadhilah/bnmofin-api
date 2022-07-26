@@ -125,26 +125,26 @@ export class CustomerController {
     });
   }
 
-  @Get('/:id')
+  @Get('/:username')
   @Authorized([AuthRole.VerifiedCustomer, AuthRole.Admin])
   async getOne(
-    @Param('id') id: number,
+    @Param('username') username: string,
     @CurrentUser() user: AuthUser,
   ) {
     return this.em.findOne(Customer, {
-      select: customerSelect(user.role === AuthRole.Admin || user.id === id),
+      select: customerSelect(user.role === AuthRole.Admin || user.username === username),
       relations: { user: true },
-      where: { userId: id },
+      where: { user: { username } },
     });
   }
 
-  @Put('/:id/verify')
+  @Put('/:username/verify')
   @Authorized(AuthRole.Admin)
-  async verify(@Param('id') id: number) {
+  async verify(@Param('username') username: string) {
     let customer: Customer;
 
     await this.em.transaction(async (em) => {
-      customer = await em.findOneByOrFail(Customer, { userId: id });
+      customer = await em.findOneByOrFail(Customer, { user: { username } });
       customer.status = CustomerStatus.Verified;
       await em.save(customer);
     });

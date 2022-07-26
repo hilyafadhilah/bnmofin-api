@@ -38,13 +38,13 @@ export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
   [ErrorName.InvalidInput]: {
     code: 400,
     title: 'Invalid Input',
-    message: () => 'The input provided was invalid.',
+    message: (custom?: string) => custom ?? 'The input provided was invalid.',
   },
   [ErrorName.NotFound]: {
     code: 404,
     title: 'Not Found',
     message: (resource?: string) => (resource
-      ? `${resource} was not found.`
+      ? `${resource} was ndot found.`
       : 'The requested resource was not found.'
     ),
   },

@@ -14,10 +14,6 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
 
     if (error instanceof AppError) {
       appError = error;
-
-      if (error.name === ErrorName.NotFound && error.data == null) {
-        appError = new AppError(ErrorName.NotFound, res.locals.resourceName);
-      }
     } else {
       if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
         appError = new AppError(ErrorName.Unauthorized);

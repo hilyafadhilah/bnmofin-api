@@ -10,3 +10,5 @@ export const middlewares = [
 export const interceptors = [
   ResponseInterceptor,
 ];
+
+export { authorizationChecker, currentUserChecker } from './auth-middleware';
