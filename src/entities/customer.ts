@@ -13,9 +13,9 @@ export enum CustomerStatus {
   Unverified = 'unverified',
 }
 
-@Entity({ name: 'Customer' })
+@Entity({ name: 'customer' })
 export class Customer {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'user_id' })
   @RelationId((customer: Customer) => customer.user)
   @IsInt()
   @IsPositive()
@@ -28,7 +28,7 @@ export class Customer {
   })
   fullname!: string;
 
-  @Column()
+  @Column({ name: 'id_card_image' })
   @IsNotEmpty()
   @IsUrl()
   idCardImage!: string;
@@ -52,8 +52,8 @@ export class Customer {
 
   @OneToOne(() => User, { cascade: true })
   @JoinColumn({
-    name: 'userId',
-    foreignKeyConstraintName: 'FK_CustomerUser',
+    name: 'user_id',
+    foreignKeyConstraintName: 'fk_customer_user',
   })
   @Type(() => User)
   @IsObject({

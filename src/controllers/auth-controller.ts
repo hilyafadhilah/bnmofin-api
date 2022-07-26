@@ -9,7 +9,7 @@ import { comparePassword, generateToken } from '../utils/auth-utils';
 import { AppError } from '../models/error';
 import { ErrorName } from '../errors';
 import { Customer, CustomerStatus } from '../entities/customer';
-import { CurrentUserResponse, LoginResponse } from '../models/responses/data/auth-response';
+import { CurrentUserAppResponse, LoginAppResponse } from '../models/responses/data/auth-appresponse';
 
 @JsonController('/auth')
 export class AuthController {
@@ -17,8 +17,8 @@ export class AuthController {
 
   @Get('/')
   @Authorized()
-  async getCurrentUser(@CurrentUser() user: AuthUser): Promise<CurrentUserResponse> {
-    const result: CurrentUserResponse = { user };
+  async getCurrentUser(@CurrentUser() user: AuthUser): Promise<CurrentUserAppResponse> {
+    const result: CurrentUserAppResponse = { user };
 
     if (user.role === AuthRole.Customer || user.role === AuthRole.VerifiedCustomer) {
       result.customer = await this.em.findOneByOrFail(Customer, { userId: user.id });
@@ -34,7 +34,7 @@ export class AuthController {
       validate: { groups: ['login'] },
     })
     data: User,
-  ): Promise<LoginResponse> {
+  ): Promise<LoginAppResponse> {
     const user = await this.em.findOneBy(User, { username: data.username });
 
     if (!user) {

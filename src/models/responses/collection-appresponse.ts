@@ -1,4 +1,4 @@
-import { BaseMetadata, BaseResponse } from './base-response';
+import { BaseAppResponseMetadata, BaseAppResponse } from './base-appresponse';
 
 export interface CollectionInfo {
   totalItems: number
@@ -7,9 +7,9 @@ export interface CollectionInfo {
   totalPages: number
 }
 
-type CollectionMetadata = BaseMetadata & CollectionInfo;
+type CollectionMetadata = BaseAppResponseMetadata & CollectionInfo;
 
-export class CollectionResponse <T> extends BaseResponse <T[], CollectionMetadata> {
+export class CollectionAppResponse <T> extends BaseAppResponse <T[], CollectionMetadata> {
   constructor(data: T[], public readonly info: Omit<CollectionInfo, 'totalPages'>) {
     super(data);
   }

@@ -11,7 +11,7 @@ import { ErrorName } from '../errors';
 import { nameMiddleware } from '../middlewares/name-middleware';
 import { AuthRole, AuthUser } from '../models/auth';
 import { AppError } from '../models/error';
-import { CollectionResponse } from '../models/responses/collection-response';
+import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
 import { IssueTransferParams } from './params/transfer-params';
@@ -42,7 +42,7 @@ export class TransferController {
 
     @CurrentUser()
     user: AuthUser,
-  ): Promise<CollectionResponse<Transfer>> {
+  ): Promise<CollectionAppResponse<Transfer>> {
     const select: FindOptionsSelect<Transfer> = {
       sender: { userId: true, fullname: true, user: { username: true } },
       receiver: { userId: true, fullname: true, user: { username: true } },
@@ -77,7 +77,7 @@ export class TransferController {
       take: pageSize,
     });
 
-    return new CollectionResponse(transactions, {
+    return new CollectionAppResponse(transactions, {
       page,
       pageSize,
       totalItems: count,

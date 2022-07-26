@@ -9,9 +9,9 @@ export enum ResponseStatus {
   Accepted = 'accepted',
 }
 
-@Entity({ name: 'Response' })
+@Entity({ name: 'response' })
 export class Response {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'request_id' })
   @RelationId((response: Response) => response.request)
   requestId!: number;
 
@@ -21,21 +21,21 @@ export class Response {
   })
   status!: ResponseStatus;
 
-  @Column()
+  @Column({ name: 'responder_id' })
   @RelationId((response: Response) => response.responder)
   responderId!: number;
 
   @OneToOne(() => Request, { cascade: true })
   @JoinColumn({
-    name: 'requestId',
-    foreignKeyConstraintName: 'FK_ResponseRequest',
+    name: 'request_id',
+    foreignKeyConstraintName: 'fk_response_request',
   })
   request!: Request;
 
   @ManyToOne(() => User, { cascade: true })
   @JoinColumn({
-    name: 'responderId',
-    foreignKeyConstraintName: 'FK_ResponseResponder',
+    name: 'responder_id',
+    foreignKeyConstraintName: 'fk_response_responder',
   })
   responder!: User;
 

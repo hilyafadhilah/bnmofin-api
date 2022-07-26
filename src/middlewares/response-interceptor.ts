@@ -3,8 +3,8 @@ import { Action, Interceptor, InterceptorInterface } from 'routing-controllers';
 import { ErrorName } from '../errors';
 import { logger } from '../logger';
 import { AppError } from '../models/error';
-import { BaseResponse } from '../models/responses/base-response';
-import { SingularResponse } from '../models/responses/singular-response';
+import { BaseAppResponse } from '../models/responses/base-appresponse';
+import { SingularAppResponse } from '../models/responses/singular-appresponse';
 
 @Interceptor()
 export class ResponseInterceptor implements InterceptorInterface {
@@ -17,15 +17,15 @@ export class ResponseInterceptor implements InterceptorInterface {
       (action.response as Response).status(204);
     }
 
-    if (result instanceof BaseResponse) {
+    if (result instanceof BaseAppResponse) {
       return result.toObject();
     }
 
     if (Array.isArray(result)) {
-      logger.error('Internal: Array response must be instanceof CollectionResponse', { response: result });
+      logger.error('Internal: Array response must be instanceof CollectionAppResponse', { response: result });
       throw new AppError(ErrorName.ServerError);
     }
 
-    return new SingularResponse(result).toObject();
+    return new SingularAppResponse(result).toObject();
   }
 }

@@ -1,9 +1,9 @@
-export interface BaseMetadata {
+export interface BaseAppResponseMetadata {
   items: number,
   timestamp: string,
 }
 
-export abstract class BaseResponse <T, M extends BaseMetadata> {
+export abstract class BaseAppResponse <T, M extends BaseAppResponseMetadata> {
   public readonly timestamp;
 
   constructor(public readonly data: T) {

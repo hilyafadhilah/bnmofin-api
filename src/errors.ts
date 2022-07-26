@@ -8,6 +8,7 @@ export enum ErrorName {
   ServerError = 'ServerError',
   InvalidInput = 'InvalidInput',
   NotFound = 'NotFound',
+  AlreadyExists = 'AlreadyExists',
 
   // auth
   Unauthorized = 'Unauthorized',
@@ -46,6 +47,14 @@ export const errorMapping: Record<ErrorName, ErrorDescriptor> = {
     message: (resource?: string) => (resource
       ? `${resource} was ndot found.`
       : 'The requested resource was not found.'
+    ),
+  },
+  [ErrorName.AlreadyExists]: {
+    code: 409,
+    title: 'Already Exists',
+    message: (resource?: string) => (resource
+      ? `${resource} already exists.`
+      : 'The requested resource already exists.'
     ),
   },
   [ErrorName.Unauthorized]: {

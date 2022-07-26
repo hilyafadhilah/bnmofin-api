@@ -10,7 +10,7 @@ import {
 import { EntityConfig } from '../config/entity-config';
 import { Customer } from './customer';
 
-@Entity({ name: 'Transfer' })
+@Entity({ name: 'transfer' })
 export class Transfer {
   @PrimaryGeneratedColumn('identity')
   @IsInt({ groups: ['query'] })
@@ -21,8 +21,8 @@ export class Transfer {
 
   @ManyToOne(() => Customer, { nullable: false })
   @JoinColumn({
-    name: 'senderId',
-    foreignKeyConstraintName: 'FK_TransferSender',
+    name: 'sender_id',
+    foreignKeyConstraintName: 'fk_transfer_sender',
   })
   @IsInstance(Customer, { groups: ['query'] })
   @ValidateNested({ groups: ['query'] })
@@ -30,7 +30,7 @@ export class Transfer {
   @Type(() => Customer)
   sender!: Customer;
 
-  @Column()
+  @Column({ name: 'sender_id' })
   @RelationId((transfer: Transfer) => transfer.sender)
   @IsInt()
   @IsPositive()
@@ -40,8 +40,8 @@ export class Transfer {
 
   @ManyToOne(() => Customer, { nullable: false })
   @JoinColumn({
-    name: 'receiverId',
-    foreignKeyConstraintName: 'FK_TransferReceiver',
+    name: 'receiver_id',
+    foreignKeyConstraintName: 'fk_transfer_receiver',
   })
   @IsInstance(Customer, { groups: ['query'] })
   @ValidateNested({ groups: ['query'] })
@@ -49,7 +49,7 @@ export class Transfer {
   @Type(() => Customer)
   receiver!: Customer;
 
-  @Column()
+  @Column({ name: 'receiver_id' })
   @RelationId((transfer: Transfer) => transfer.receiver)
   @IsInt({ groups: ['issue'] })
   @IsPositive({ groups: ['issue'] })

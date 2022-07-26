@@ -1,5 +1,7 @@
+/* eslint-disable max-classes-per-file */
 import { Expose, Type } from 'class-transformer';
-import { IsInstance, ValidateNested } from 'class-validator';
+import { IsEnum, IsInstance, ValidateNested } from 'class-validator';
+import { ResponseStatus } from '../../entities/response';
 import { Money } from '../../models/money';
 
 export class NewRequestParams {
@@ -8,4 +10,10 @@ export class NewRequestParams {
   @Expose()
   @Type(() => Money)
   money!: Money;
+}
+
+export class ResponseParams {
+  @IsEnum(ResponseStatus)
+  @Expose()
+  status!: ResponseStatus;
 }

@@ -13,7 +13,7 @@ import { IdCardUploadConfig } from '../config/fileupload-config';
 import { PaginationOptions } from './params/pagination-options';
 import { PaginationParams } from './decorators/pagination-params';
 import { AuthRole, AuthUser } from '../models/auth';
-import { CollectionResponse } from '../models/responses/collection-response';
+import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { nameMiddleware } from '../middlewares/name-middleware';
 
 const customerSelect = (isAdmin: boolean) => ({
@@ -103,7 +103,7 @@ export class CustomerController {
     @CurrentUser()
     user: AuthUser,
 
-  ): Promise<CollectionResponse<Customer>> {
+  ): Promise<CollectionAppResponse<Customer>> {
     if (user.role === AuthRole.VerifiedCustomer
       && (query.balance !== undefined || query.status !== undefined)
     ) {
@@ -114,11 +114,12 @@ export class CustomerController {
       select: customerSelect(user.role === AuthRole.Admin),
       relations: { user: true },
       where: query,
+      order: { created: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
 
-    return new CollectionResponse(customers, {
+    return new CollectionAppResponse(customers, {
       page,
       pageSize,
       totalItems: count,

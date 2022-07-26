@@ -1,80 +1,117 @@
 import {
-  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams, UseBefore,
+  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, UseBefore,
 } from 'routing-controllers';
-import { FindManyOptions } from 'typeorm';
+import type { SelectQueryBuilder } from 'typeorm';
 import { convert } from '../api/exchange-api';
 import { MoneyConfig } from '../config/money-config';
 import { dataSource } from '../data-source';
-import { Customer } from '../entities/customer';
-import { Request, RequestStatus } from '../entities/request';
+import { Request } from '../entities/request';
+import { Response, ResponseStatus } from '../entities/response';
+import { User } from '../entities/user';
 import { ErrorName } from '../errors';
 import { nameMiddleware } from '../middlewares/name-middleware';
 import { AuthRole, AuthUser } from '../models/auth';
 import { AppError } from '../models/error';
-import { CollectionResponse } from '../models/responses/collection-response';
+import { CollectionAppResponse } from '../models/responses/collection-appresponse';
+import type { RequestAppResponse } from '../models/responses/data';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
-import { NewRequestParams } from './params/request-params';
+import { NewRequestParams, ResponseParams } from './params/request-params';
+
+type RequestSelect = Request & { response?: Omit<Response, 'request'> };
 
 @JsonController('/request')
 @UseBefore(nameMiddleware('Request'))
 export class RequestController {
   private em = dataSource.manager;
 
+  private selectQueryBuilder(verbose: boolean): SelectQueryBuilder<RequestSelect> {
+    // HACK due to many bugs in typeorm, this is the best we can do
+    // this will fetch all fields from joined relations
+    const qb = this.em
+      .createQueryBuilder(Request, 'request')
+      .leftJoinAndMapOne(
+        'request.response',
+        Response,
+        'response',
+        'response.request_id = request.id',
+      )
+      .leftJoinAndMapOne(
+        'response.responder',
+        User,
+        'responder',
+        'responder.id = response.responder_id',
+      );
+
+    if (verbose) {
+      qb
+        .innerJoinAndSelect(
+          'request.customer',
+          'customer',
+          'customer.user_id = request.customer_id',
+        )
+        .innerJoinAndSelect(
+          'customer.user',
+          'user',
+          'user.id = customer.user_id',
+        );
+    }
+
+    return qb as SelectQueryBuilder<RequestSelect>;
+  }
+
+  private static transformResult(result: RequestSelect): RequestAppResponse {
+    const ref = result as unknown as RequestAppResponse;
+
+    ref.customer = {
+      fullname: ref.customer.fullname,
+      user: {
+        username: ref.customer.user.username,
+      },
+    };
+
+    if (ref.response) {
+      delete (ref.response as any).requestId;
+      ref.response.responder = {
+        username: ref.response.responder.username,
+      };
+    }
+
+    return ref;
+  }
+
   @Get('/')
   @Authorized([AuthRole.Admin, AuthRole.VerifiedCustomer])
   async getAll(
-
-    @QueryParams({
-      transform: {
-        excludeExtraneousValues: true,
-        exposeUnsetFields: false,
-      },
-      validate: {
-        groups: ['query'],
-        skipMissingProperties: true,
-      },
-    })
-    query: Request,
 
     @PaginationParams()
     { page, pageSize }: PaginationOptions,
 
     @CurrentUser()
     user: AuthUser,
-  ): Promise<CollectionResponse<Request>> {
-    if (user.role === AuthRole.VerifiedCustomer
-      && (query.customer != null)
-    ) {
-      throw new AppError(ErrorName.Forbidden);
+  ): Promise<CollectionAppResponse<RequestAppResponse>> {
+    const isAdmin = user.role === AuthRole.Admin;
+    const qb = this.selectQueryBuilder(isAdmin);
+
+    if (!isAdmin) {
+      qb.where('request.customerId = :customerId', { customerId: user.id });
     }
 
-    const options: FindManyOptions<Request> = {
-      order: { created: 'desc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    };
+    qb.orderBy('request.created', 'DESC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize);
 
-    if (user.role === AuthRole.Admin) {
-      options.select = {
-        customer: { fullname: true, user: { username: true } },
-      };
-      options.where = query;
-      options.relations = { customer: { user: true } };
-    } else if (user.role === AuthRole.VerifiedCustomer) {
-      options.where = {
-        ...query,
-        customerId: user.id,
-      };
-    }
+    const [requests, count] = await qb.getManyAndCount();
+    requests.forEach(RequestController.transformResult);
 
-    const [requests, count] = await this.em.findAndCount(Request, options);
-
-    return new CollectionResponse(requests, {
-      page,
-      pageSize,
-      totalItems: count,
-    });
+    return new CollectionAppResponse(
+      requests as unknown as RequestAppResponse[],
+      {
+        page,
+        pageSize,
+        totalItems: count,
+      },
+    );
   }
 
   @Post('/')
@@ -107,60 +144,59 @@ export class RequestController {
     @Param('id') id: number,
     @CurrentUser() user: AuthUser,
   ) {
-    const request = await this.em.findOneByOrFail(Request, { id });
+    const request = await this
+      .selectQueryBuilder(true)
+      .where('request.id = :id', { id })
+      .getOneOrFail();
 
     if (user.role !== AuthRole.Admin && request.customerId !== user.id) {
       throw new AppError(ErrorName.Forbidden);
     }
 
-    return request;
+    return RequestController.transformResult(request);
   }
 
-  @Put('/:id/status')
+  @Post('/:id/response')
   @Authorized(AuthRole.Admin)
-  async updateStatus(
+  async respond(
 
     @Param('id')
     id: number,
 
     @Body({
       required: true,
-      validate: { groups: ['updateStatus'] },
+      validate: true,
     })
-    { status }: Request,
+    { status }: ResponseParams,
+
+    @CurrentUser()
+    user: AuthUser,
 
   ) {
-    let request: Request;
+    let response: Response;
 
     await this.em.transaction(async (em) => {
-      const find = await em.findOneOrFail(Request, { where: { id } });
+      const request = await this.em.findOneByOrFail(Request, { id });
+      const found = await this.em.countBy(Response, { requestId: id });
 
-      request = find;
-
-      if (request.status !== RequestStatus.Awaiting) {
-        throw new AppError(ErrorName.InvalidInput);
+      if (found !== 0) {
+        throw new AppError(ErrorName.AlreadyExists, 'Response');
       }
 
-      if (status === RequestStatus.Accepted) {
-        await em.update(
-          Customer,
-          { userId: request.customerId },
-          { balance: () => `balance + ${request.amount}` },
-        );
-        // request.customer.balance += request.amount;
+      if (status === ResponseStatus.Accepted) {
+        request.customer.balance += request.amount;
+        await em.save(request.customer);
       }
 
-      request.status = status;
+      response = em.create(Response, {
+        requestId: request.id,
+        responderId: user.id,
+        status,
+      });
+
       await em.save(request);
-
-      try {
-        // Reload customer. See https://github.com/typeorm/typeorm/issues/3255
-        request.customer = await em.findOneByOrFail(Customer, { userId: request.customerId });
-      } catch (err) {
-        throw new AppError(ErrorName.ServerError, err);
-      }
     });
 
-    return request!;
+    return response!;
   }
 }

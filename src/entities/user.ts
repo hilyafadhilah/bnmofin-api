@@ -11,7 +11,7 @@ export enum UserRole {
   Customer = 'customer',
 }
 
-@Entity({ name: 'User' })
+@Entity({ name: 'user' })
 export class User {
   @PrimaryGeneratedColumn('identity')
   @IsInt()
@@ -19,7 +19,7 @@ export class User {
   id!: number;
 
   @Column()
-  @Index('UQ_username', { unique: true })
+  @Index('uq_username', { unique: true })
   @Length(5, 25, {
     groups: ['register', 'login', 'query'],
   })

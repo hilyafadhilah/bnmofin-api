@@ -1,20 +1,16 @@
+/* eslint-disable max-classes-per-file */
 import { Expose, Type } from 'class-transformer';
 import {
-  IsEnum, IsIn, IsInstance, IsInt, IsNumber, IsPositive, ValidateNested,
+  IsInstance, IsInt, IsNumber, IsPositive, ValidateNested,
 } from 'class-validator';
 import {
-  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId,
+  Column, CreateDateColumn, Entity, JoinColumn,
+  ManyToOne, PrimaryGeneratedColumn, RelationId,
 } from 'typeorm';
 import { EntityConfig } from '../config/entity-config';
 import { Customer } from './customer';
 
-export enum RequestStatus {
-  Accepted = 'accepted',
-  Declined = 'declined',
-  Awaiting = 'awaiting',
-}
-
-@Entity({ name: 'Request' })
+@Entity({ name: 'request' })
 export class Request {
   @PrimaryGeneratedColumn('identity')
   @IsInt()
@@ -25,8 +21,8 @@ export class Request {
 
   @ManyToOne(() => Customer, { nullable: false })
   @JoinColumn({
-    name: 'customerId',
-    foreignKeyConstraintName: 'FK_RequestCustomer',
+    name: 'customer_id',
+    foreignKeyConstraintName: 'fk_request_customer',
   })
   @IsInstance(Customer, { groups: ['query'] })
   @ValidateNested({ groups: ['query'] })
@@ -34,7 +30,7 @@ export class Request {
   @Type(() => Customer)
   customer!: Customer;
 
-  @Column()
+  @Column({ name: 'customer_id' })
   @RelationId((request: Request) => request.customer)
   @IsInt()
   @IsPositive()
@@ -50,21 +46,6 @@ export class Request {
   @Expose()
   @Type(() => Number)
   amount!: number;
-
-  // @Column({
-  //   type: 'enum',
-  //   enum: RequestStatus,
-  //   default: RequestStatus.Awaiting,
-  // })
-  // @IsEnum(RequestStatus, {
-  //   groups: ['updateStatus', 'query'],
-  // })
-  // @IsIn(
-  //   [RequestStatus.Accepted, RequestStatus.Declined],
-  //   { groups: ['updateStatus'] },
-  // )
-  // @Expose()
-  // status!: RequestStatus;
 
   @CreateDateColumn()
   created!: Date;
