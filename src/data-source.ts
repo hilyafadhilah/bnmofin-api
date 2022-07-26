@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { entities } from './entities';
+import { seeder } from './seed';
 
 export const dataSource = new DataSource({
   type: 'postgres',
@@ -8,8 +9,9 @@ export const dataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DBNAME,
-  synchronize: true,
-  logging: true,
+  dropSchema: seeder.isSeed,
+  synchronize: false,
+  logging: ['info', 'warn', 'error', 'migration'],
   entities,
   subscribers: [],
   migrations: [],

@@ -13,11 +13,16 @@
     "dev": "nodemon -w src --exec \"ts-node --swc\" src/index.ts",
     "lint": "eslint src",
     "build": "tsc",
-    "serve": "node dist/index.js"
+    "serve": "node dist/index.js",
+    "schema:drop": "ts-node ./node_modules/typeorm/cli.js schema:drop -d src/data-source.ts",
+    "schema:log": "ts-node ./node_modules/typeorm/cli.js schema:log -d src/data-source.ts",
+    "schema:sync": "ts-node ./node_modules/typeorm/cli.js schema:sync -d src/data-source.ts",
+    "seed:run": "ts-node ./scripts/seed.ts",
+    "seed:info": "ts-node ./scripts/seed.ts --info-only"
   },
   "dependencies": {
-    "@types/bcryptjs": "^2.4.2",
-    "@types/jsonwebtoken": "^8.5.8",
+    "@faker-js/faker": "^7.3.0",
+    "@jorgebodega/typeorm-seeding": "^5.0.0-next.1",
     "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
@@ -37,9 +42,11 @@
   },
   "devDependencies": {
     "@swc/core": "^1.2.213",
+    "@types/bcryptjs": "^2.4.2",
     "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
+    "@types/jsonwebtoken": "^8.5.8",
     "@types/multer": "^1.4.7",
     "@types/node": "^18.0.3",
     "@typescript-eslint/eslint-plugin": "^5.30.6",

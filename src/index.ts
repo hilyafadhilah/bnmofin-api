@@ -11,6 +11,7 @@ import { dataSource } from './data-source';
 import { logger } from './logger';
 import { initializeCacher } from './cacher';
 import { initializeUploader } from './uploader';
+import { seeder } from './seed';
 
 const app = express();
 const appPort = process.env.APP_PORT ?? 3030;
@@ -36,14 +37,27 @@ useExpressServer(app, {
 
 const bootstrap = async () => {
   try {
+    logger.info('Initializing firebase.');
     initializeUploader();
     logger.info('Connected to firebase.');
 
+    logger.info('Initializing DB.');
     await dataSource.initialize();
     logger.info('Connected to DB.');
 
+    logger.info('Initializing redis.');
     await initializeCacher();
     logger.info('Connected to redis.');
+
+    if (seeder.isSeed) {
+      logger.info('Initializing seeder.');
+      await seeder.seed(dataSource);
+      logger.info('Seeder finished.');
+    }
+
+    if (seeder.isSeedInfo) {
+      await seeder.printInfo(dataSource);
+    }
 
     app.listen(appPort);
     logger.info(`Server ready on port ${appPort}.`);

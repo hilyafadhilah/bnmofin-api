@@ -141,16 +141,12 @@ export class TransferController {
       });
 
       await em.save(transfer);
-      await em.update(
-        Customer,
-        { userId: sender.userId },
-        { balance: () => `balance - ${transfer.amount}` },
-      );
-      await em.update(
-        Customer,
-        { userId: receiver.userId },
-        { balance: () => `balance - ${transfer.amount}` },
-      );
+
+      sender.balance -= transfer.amount;
+      receiver.balance += transfer.amount;
+
+      await em.save(sender);
+      await em.save(receiver);
 
       transfer.sender = sender;
       transfer.receiver = receiver;

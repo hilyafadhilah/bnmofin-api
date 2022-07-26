@@ -19,7 +19,7 @@ export class User {
   id!: number;
 
   @Column()
-  @Index({ unique: true })
+  @Index('UQ_username', { unique: true })
   @Length(5, 25, {
     groups: ['register', 'login', 'query'],
   })

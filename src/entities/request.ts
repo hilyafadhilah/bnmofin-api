@@ -51,20 +51,20 @@ export class Request {
   @Type(() => Number)
   amount!: number;
 
-  @Column({
-    type: 'enum',
-    enum: RequestStatus,
-    default: RequestStatus.Awaiting,
-  })
-  @IsEnum(RequestStatus, {
-    groups: ['updateStatus', 'query'],
-  })
-  @IsIn(
-    [RequestStatus.Accepted, RequestStatus.Declined],
-    { groups: ['updateStatus'] },
-  )
-  @Expose()
-  status!: RequestStatus;
+  // @Column({
+  //   type: 'enum',
+  //   enum: RequestStatus,
+  //   default: RequestStatus.Awaiting,
+  // })
+  // @IsEnum(RequestStatus, {
+  //   groups: ['updateStatus', 'query'],
+  // })
+  // @IsIn(
+  //   [RequestStatus.Accepted, RequestStatus.Declined],
+  //   { groups: ['updateStatus'] },
+  // )
+  // @Expose()
+  // status!: RequestStatus;
 
   @CreateDateColumn()
   created!: Date;

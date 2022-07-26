@@ -12,6 +12,8 @@ services:
       - TOKEN_KEY
       - NODE_ENV=${APP_PORT:-production}
       - APP_PORT=${APP_PORT:-3000}
+      - SEED_DATA=${SEED_DATA:-no}
+      - SEED_INFO=${SEED_INFO:-no}
       - REDIS_URL=redis://redis:6379
       - DB_USER=postgres
       - DB_PASSWORD=postgres
