@@ -15,18 +15,16 @@ export const logger = createLogger({
   ),
   transports: [
     new transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new transports.File({ filename: 'logs/logs.log' }),
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.label({ label: 'app' }),
+        format.timestamp(),
+        format.printf(({
+          level, message, label, timestamp, ...rest
+        }) => `${timestamp} [${label}] ${level}: ${message}${jsonStringify(rest)}`),
+      ),
+    }),
   ],
 });
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new transports.Console({
-    format: format.combine(
-      format.colorize(),
-      format.label({ label: 'app' }),
-      format.timestamp(),
-      format.printf(({
-        level, message, label, timestamp, ...rest
-      }) => `${timestamp} [${label}] ${level}: ${message}${jsonStringify(rest)}`),
-    ),
-  }));
-}
