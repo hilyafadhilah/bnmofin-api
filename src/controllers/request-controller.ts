@@ -212,11 +212,11 @@ export class RequestController {
         status,
       });
 
+      await em.save(response);
+
       (response.responder as any) = {
         username: user.username,
       };
-
-      await em.save(response);
     });
 
     return response!;
