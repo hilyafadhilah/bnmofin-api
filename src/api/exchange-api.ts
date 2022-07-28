@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { decache, encache } from '../cacher';
-import { ErrorName } from '../errors';
-import { AppError } from '../models/error';
+import {
+  AppError, CurrencyLimit, InvalidInput, ServerError,
+} from '../error';
 import { ExchangeApi, ExchangeApiResponse } from '../models/exchange';
 
 console.assert(process.env.APILAYER_KEY, 'ApiLayer key is not set.');
@@ -17,7 +18,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 429) {
-      return Promise.reject(new AppError(ErrorName.IdrOnly));
+      return Promise.reject(new AppError(CurrencyLimit()));
     }
 
     return Promise.reject(error);
@@ -49,7 +50,7 @@ export async function getSymbols() {
   if (symbols == null) {
     const response = await axiosInstance.get('/symbols');
     if (!response.data.success) {
-      throw new AppError(ErrorName.ServerError, response);
+      throw new AppError(ServerError(), response, true);
     }
 
     symbols = response.data.symbols;
@@ -74,7 +75,7 @@ export async function convert(amount: number, from: string, to: string) {
   const symbols = await getSymbolsList();
 
   if (!symbols.includes(from) || !symbols.includes(to)) {
-    throw new AppError(ErrorName.InvalidInput);
+    throw new AppError(InvalidInput({ thing: 'currency symbol' }));
   }
 
   let rate = 1.0;
@@ -93,7 +94,7 @@ export async function convert(amount: number, from: string, to: string) {
       });
 
       if (!response.data.success) {
-        throw new AppError(ErrorName.ServerError, response);
+        throw new AppError(ServerError(), response, true);
       }
 
       info = response.data.info;

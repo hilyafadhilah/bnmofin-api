@@ -8,10 +8,11 @@ import { dataSource } from '../data-source';
 import { Request } from '../entities/request';
 import { Response, ResponseStatus } from '../entities/response';
 import { User } from '../entities/user';
-import { ErrorName } from '../errors';
+import {
+  AlreadyExists, AppError, Forbidden, MoneyLimit,
+} from '../error';
 import { nameMiddleware } from '../middlewares/name-middleware';
 import { AuthRole, AuthUser } from '../models/auth';
-import { AppError } from '../models/error';
 import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import type { RequestAppResponse } from '../models/responses/data';
 import { PaginationParams } from './decorators/pagination-params';
@@ -21,7 +22,7 @@ import { NewRequestParams, ResponseParams } from './params/request-params';
 type RequestSelect = Request & { response?: Omit<Response, 'request'> };
 
 @JsonController('/request')
-@UseBefore(nameMiddleware('Request'))
+@UseBefore(nameMiddleware('request'))
 export class RequestController {
   private em = dataSource.manager;
 
@@ -60,21 +61,31 @@ export class RequestController {
     return qb as SelectQueryBuilder<RequestSelect>;
   }
 
-  private static transformResult(result: RequestSelect): RequestAppResponse {
+  private static transformResult(result: RequestSelect, verbose: boolean): RequestAppResponse {
     const ref = result as unknown as RequestAppResponse;
 
-    ref.customer = {
-      fullname: ref.customer.fullname,
-      user: {
-        username: ref.customer.user.username,
-      },
-    };
-
-    if (ref.response) {
-      delete (ref.response as any).requestId;
-      ref.response.responder = {
-        username: ref.response.responder.username,
+    if (verbose) {
+      ref.customer = {
+        fullname: result.customer.fullname,
+        balance: result.customer.balance,
+        user: {
+          username: result.customer.user.username,
+        },
       };
+    } else {
+      delete ref.customer;
+    }
+
+    if (ref.response && result.response) {
+      delete (ref.response as any).requestId;
+
+      if (verbose) {
+        ref.response.responder = {
+          username: result.response.responder.username,
+        };
+      } else {
+        delete ref.response.responder;
+      }
     }
 
     return ref;
@@ -85,7 +96,7 @@ export class RequestController {
   async getAll(
 
     @PaginationParams()
-    { page, pageSize }: PaginationOptions,
+    { skip, take }: PaginationOptions,
 
     @CurrentUser()
     user: AuthUser,
@@ -98,19 +109,14 @@ export class RequestController {
     }
 
     qb.orderBy('request.created', 'DESC')
-      .skip((page - 1) * pageSize)
-      .take(pageSize);
+      .skip(skip)
+      .take(take);
 
     const [requests, count] = await qb.getManyAndCount();
-    requests.forEach(RequestController.transformResult);
 
     return new CollectionAppResponse(
-      requests as unknown as RequestAppResponse[],
-      {
-        page,
-        pageSize,
-        totalItems: count,
-      },
+      requests.map((r) => RequestController.transformResult(r, isAdmin)),
+      { skip, take, total: count },
     );
   }
 
@@ -125,13 +131,24 @@ export class RequestController {
     user: AuthUser,
 
   ) {
+    const amount = await convert(
+      data.money.amount,
+      data.money.currency,
+      MoneyConfig.defaultCurrency.symbol,
+    );
+
+    if (amount < MoneyConfig.limit.request.min
+      || amount > MoneyConfig.limit.request.max
+    ) {
+      throw new AppError(MoneyLimit({
+        amount,
+        limit: MoneyConfig.limit.request,
+      }));
+    }
+
     const request = this.em.create(Request, {
       customerId: user.id,
-      amount: await convert(
-        data.money.amount,
-        data.money.currency,
-        MoneyConfig.defaultCurrency,
-      ),
+      amount,
     });
 
     await this.em.save(request);
@@ -150,10 +167,10 @@ export class RequestController {
       .getOneOrFail();
 
     if (user.role !== AuthRole.Admin && request.customerId !== user.id) {
-      throw new AppError(ErrorName.Forbidden);
+      throw new AppError(Forbidden());
     }
 
-    return RequestController.transformResult(request);
+    return RequestController.transformResult(request, user.role === AuthRole.Admin);
   }
 
   @Post('/:id/response')
@@ -176,11 +193,12 @@ export class RequestController {
     let response: Response;
 
     await this.em.transaction(async (em) => {
-      const request = await this.em.findOneByOrFail(Request, { id });
-      const found = await this.em.countBy(Response, { requestId: id });
+      const request = await this.selectQueryBuilder(true)
+        .where('request.id = :id', { id })
+        .getOneOrFail();
 
-      if (found !== 0) {
-        throw new AppError(ErrorName.AlreadyExists, 'Response');
+      if (request.response) {
+        throw new AppError(AlreadyExists({ thing: 'Response' }));
       }
 
       if (status === ResponseStatus.Accepted) {
@@ -194,7 +212,11 @@ export class RequestController {
         status,
       });
 
-      await em.save(request);
+      (response.responder as any) = {
+        username: user.username,
+      };
+
+      await em.save(response);
     });
 
     return response!;

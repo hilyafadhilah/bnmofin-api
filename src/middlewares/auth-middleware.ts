@@ -6,8 +6,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { decodeToken } from '../utils/auth-utils';
 import { AuthRole } from '../models/auth';
-import { AppError } from '../models/error';
-import { ErrorName } from '../errors';
+import { AppError, InvalidToken, TokenExpired } from '../error';
 
 @Middleware({ type: 'before' })
 export class AuthMiddleware implements ExpressMiddlewareInterface {
@@ -23,9 +22,9 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
       next();
     } catch (err) {
       if (err instanceof TokenExpiredError) {
-        next(new AppError(ErrorName.TokenExpired));
+        next(new AppError(TokenExpired()));
       } else {
-        next(new AppError(ErrorName.InvalidToken));
+        next(new AppError(InvalidToken()));
       }
     }
   }

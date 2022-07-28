@@ -6,8 +6,6 @@ import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { User } from '../entities/user';
 import { hashPassword } from '../utils/auth-utils';
-import { AppError } from '../models/error';
-import { ErrorName } from '../errors';
 import { replaceFilename, uploadFile } from '../utils/fileupload-utils';
 import { IdCardUploadConfig } from '../config/fileupload-config';
 import { PaginationOptions } from './params/pagination-options';
@@ -15,6 +13,7 @@ import { PaginationParams } from './decorators/pagination-params';
 import { AuthRole, AuthUser } from '../models/auth';
 import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { nameMiddleware } from '../middlewares/name-middleware';
+import { AlreadyExists, AppError, Forbidden } from '../error';
 
 const customerSelect = (isAdmin: boolean) => ({
   userId: true,
@@ -30,7 +29,7 @@ const customerSelect = (isAdmin: boolean) => ({
 });
 
 @JsonController('/customer')
-@UseBefore(nameMiddleware('Customer'))
+@UseBefore(nameMiddleware('customer'))
 export class CustomerController {
   private em = dataSource.manager;
 
@@ -56,7 +55,7 @@ export class CustomerController {
     await this.em.transaction(async (em) => {
       const existingUser = await em.findOneBy(User, { username: data.user.username });
       if (existingUser != null) {
-        throw new AppError(ErrorName.UsernameTaken, { username: data.user.username });
+        throw new AppError(AlreadyExists({ thing: `username ${data.user.username}` }));
       }
 
       let user: User = { ...data.user };
@@ -98,7 +97,7 @@ export class CustomerController {
     query: Customer,
 
     @PaginationParams()
-    { page, pageSize }: PaginationOptions,
+    { skip, take }: PaginationOptions,
 
     @CurrentUser()
     user: AuthUser,
@@ -107,7 +106,7 @@ export class CustomerController {
     if (user.role === AuthRole.VerifiedCustomer
       && (query.balance !== undefined || query.status !== undefined)
     ) {
-      throw new AppError(ErrorName.Forbidden);
+      throw new AppError(Forbidden());
     }
 
     const [customers, count] = await this.em.findAndCount(Customer, {
@@ -115,15 +114,11 @@ export class CustomerController {
       relations: { user: true },
       where: query,
       order: { created: 'desc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      skip,
+      take,
     });
 
-    return new CollectionAppResponse(customers, {
-      page,
-      pageSize,
-      totalItems: count,
-    });
+    return new CollectionAppResponse(customers, { skip, take, total: count });
   }
 
   @Get('/:username')

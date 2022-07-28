@@ -1,23 +1,18 @@
-import { Expose, Type } from 'class-transformer';
-import {
-  IsIn, IsInt, IsOptional, IsPositive,
-} from 'class-validator';
-
-export const allowedPageSizes = [
-  25, 50, 100, 250,
-];
+import { Expose, Transform, Type } from 'class-transformer';
+import { IsInt, IsOptional, Min } from 'class-validator';
 
 export class PaginationOptions {
   @IsOptional()
   @IsInt()
-  @IsPositive()
+  @Min(0)
   @Expose()
   @Type(() => Number)
-  page: number = 1;
+  skip: number = 0;
 
   @IsOptional()
-  @IsIn(allowedPageSizes)
+  @IsInt()
+  @Min(1)
   @Expose()
-  @Type(() => Number)
-  pageSize: number = 50;
+  @Transform(({ value }) => (value ? Math.min(Number(value), 200) : 50))
+  take: number = 50;
 }

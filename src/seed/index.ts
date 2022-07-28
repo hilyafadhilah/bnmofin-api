@@ -1,6 +1,6 @@
 import { useDataSource, useSeeders } from '@jorgebodega/typeorm-seeding';
 import type { DataSource } from 'typeorm';
-import { isTrueString } from '../utils/model-utils';
+import { isTrueString } from '../utils/data-utils';
 import { printInfo } from './seed-utils';
 import { seeders } from './seeders';
 

@@ -5,15 +5,15 @@ import { ResponseStatus } from '../../entities/response';
 import { Money } from '../../models/money';
 
 export class NewRequestParams {
-  @IsInstance(Money)
-  @ValidateNested()
+  @IsInstance(Money, { always: true })
+  @ValidateNested({ always: true })
   @Expose()
   @Type(() => Money)
   money!: Money;
 }
 
 export class ResponseParams {
-  @IsEnum(ResponseStatus)
+  @IsEnum(ResponseStatus, { always: true })
   @Expose()
   status!: ResponseStatus;
 }

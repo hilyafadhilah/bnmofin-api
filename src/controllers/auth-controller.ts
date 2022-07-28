@@ -6,10 +6,11 @@ import { dataSource } from '../data-source';
 import { User, UserRole } from '../entities/user';
 import { AuthUser, AuthRole } from '../models/auth';
 import { comparePassword, generateToken } from '../utils/auth-utils';
-import { AppError } from '../models/error';
-import { ErrorName } from '../errors';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { CurrentUserAppResponse, LoginAppResponse } from '../models/responses/data/auth-appresponse';
+import {
+  AppError, Forbidden, InvalidCredentials, NotFound, Unauthorized,
+} from '../error';
 
 @JsonController('/auth')
 export class AuthController {
@@ -38,11 +39,11 @@ export class AuthController {
     const user = await this.em.findOneBy(User, { username: data.username });
 
     if (!user) {
-      throw new AppError(ErrorName.NotFound, `Username "${data.username}"`);
+      throw new AppError(NotFound({ thing: `username "${data.username}"` }));
     }
 
     if (!await comparePassword(data.password, user.password)) {
-      throw new AppError(ErrorName.WrongPassword);
+      throw new AppError(InvalidCredentials({ message: 'Wrong password.' }));
     }
 
     let role = AuthRole.Any;
@@ -56,10 +57,10 @@ export class AuthController {
       if (customer.status === CustomerStatus.Verified) {
         role = AuthRole.VerifiedCustomer;
       } else {
-        throw new AppError(ErrorName.UnverifiedAccount);
+        throw new AppError(Forbidden({ message: 'Account not verified.' }));
       }
     } else {
-      throw new AppError(ErrorName.Unauthorized);
+      throw new AppError(Unauthorized());
     }
 
     const authUser: AuthUser = {

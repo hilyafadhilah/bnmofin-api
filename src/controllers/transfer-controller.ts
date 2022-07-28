@@ -7,17 +7,18 @@ import { MoneyConfig } from '../config/money-config';
 import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { Transfer } from '../entities/transfer';
-import { ErrorName } from '../errors';
+import {
+  AppError, Forbidden, InsufficientBalance, InvalidInput, MoneyLimit, NotFound,
+} from '../error';
 import { nameMiddleware } from '../middlewares/name-middleware';
 import { AuthRole, AuthUser } from '../models/auth';
-import { AppError } from '../models/error';
 import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
 import { IssueTransferParams } from './params/transfer-params';
 
 @JsonController('/transfer')
-@UseBefore(nameMiddleware('Transaction'))
+@UseBefore(nameMiddleware('transaction'))
 export class TransferController {
   private em = dataSource.manager;
 
@@ -38,7 +39,7 @@ export class TransferController {
     query: Transfer,
 
     @PaginationParams()
-    { page, pageSize }: PaginationOptions,
+    { skip, take }: PaginationOptions,
 
     @CurrentUser()
     user: AuthUser,
@@ -52,7 +53,7 @@ export class TransferController {
 
     if (user.role === AuthRole.VerifiedCustomer) {
       if (query.receiver != null && query.sender != null) {
-        throw new AppError(ErrorName.Forbidden);
+        throw new AppError(Forbidden());
       }
 
       where = [];
@@ -73,14 +74,14 @@ export class TransferController {
       where: where!,
       relations: { sender: { user: true }, receiver: { user: true } },
       order: { created: 'desc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      skip,
+      take,
     });
 
     return new CollectionAppResponse(transactions, {
-      page,
-      pageSize,
-      totalItems: count,
+      skip,
+      take,
+      total: count,
     });
   }
 
@@ -96,7 +97,7 @@ export class TransferController {
 
   ) {
     if (data.username === user.username) {
-      throw new AppError(ErrorName.InvalidInput);
+      throw new AppError(InvalidInput({ thing: 'receiver' }));
     }
 
     let transfer: Transfer;
@@ -113,11 +114,23 @@ export class TransferController {
       const amount = await convert(
         data.money.amount,
         data.money.currency,
-        MoneyConfig.defaultCurrency,
+        MoneyConfig.defaultCurrency.symbol,
       );
 
       if (sender.balance < amount) {
-        throw new AppError(ErrorName.InvalidInput);
+        throw new AppError(InsufficientBalance({
+          balance: sender.balance,
+          amount: data.money.amount,
+        }));
+      }
+
+      if (amount < MoneyConfig.limit.transfer.min
+        || amount > MoneyConfig.limit.transfer.max
+      ) {
+        throw new AppError(MoneyLimit({
+          amount,
+          limit: MoneyConfig.limit.transfer,
+        }));
       }
 
       const receiver = await em.findOne(Customer, {
@@ -127,11 +140,14 @@ export class TransferController {
       });
 
       if (!receiver) {
-        throw new AppError(ErrorName.NotFound, 'Receiver');
+        throw new AppError(NotFound({ thing: 'receiver' }));
       }
 
       if (receiver.status === CustomerStatus.Unverified) {
-        throw new AppError(ErrorName.InvalidInput);
+        throw new AppError(InvalidInput({
+          thing: 'receiver',
+          message: 'The submitted receiver has not yet been verified.',
+        }));
       }
 
       transfer = em.create(Transfer, {
@@ -164,7 +180,7 @@ export class TransferController {
     const transfer = await this.em.findOneByOrFail(Transfer, { id });
 
     if (transfer.receiverId !== user.id && transfer.senderId !== user.id) {
-      throw new AppError(ErrorName.Forbidden);
+      throw new AppError(Forbidden());
     }
 
     return transfer;

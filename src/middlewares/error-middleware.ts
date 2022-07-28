@@ -3,9 +3,10 @@ import {
 } from 'routing-controllers';
 import type { Response } from 'express';
 import { EntityNotFoundError } from 'typeorm';
-import { AppError } from '../models/error';
-import { ErrorName } from '../errors';
 import { logger } from '../logger';
+import {
+  AppError, InvalidInput, NotFound, ServerError, Unauthorized,
+} from '../error';
 
 @Middleware({ type: 'after' })
 export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
@@ -16,13 +17,13 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
       appError = error;
     } else {
       if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
-        appError = new AppError(ErrorName.Unauthorized);
+        appError = new AppError(Unauthorized());
       } else if (error instanceof BadRequestError) {
-        appError = new AppError(ErrorName.InvalidInput);
+        appError = new AppError(InvalidInput());
       } else if (error instanceof EntityNotFoundError) {
-        appError = new AppError(ErrorName.NotFound, res.locals.resourceName);
+        appError = new AppError(NotFound({ thing: res.locals.resourceName }));
       } else {
-        appError = new AppError(ErrorName.ServerError);
+        appError = new AppError(ServerError());
       }
 
       if (process.env.NODE_ENV !== 'production' && !appError.data) {

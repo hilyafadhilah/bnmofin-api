@@ -2,8 +2,7 @@ import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 import { Request } from 'express';
 import { Action, createParamDecorator } from 'routing-controllers';
-import { ErrorName } from '../../errors';
-import { AppError } from '../../models/error';
+import { AppError, InvalidInput } from '../../error';
 import { PaginationOptions } from '../params/pagination-options';
 
 export type PaginationParamsOptions = {
@@ -24,7 +23,7 @@ export function PaginationParams(options?: PaginationParamsOptions) {
       try {
         await validateOrReject(paginationParams);
       } catch (err) {
-        throw new AppError(ErrorName.InvalidInput, err);
+        throw new AppError(InvalidInput({ thing: 'pagination options' }), err);
       }
 
       if (!options?.keep) {
