@@ -64,7 +64,7 @@ export class CustomerController {
 
       const uploadedFile = await uploadFile(
         file.path,
-        `IdCards/${replaceFilename(file.originalname, user.id.toString())}`,
+        `${IdCardUploadConfig.dirname}/${replaceFilename(file.originalname, user.id.toString())}`,
       );
 
       customer = {

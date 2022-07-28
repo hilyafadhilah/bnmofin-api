@@ -16,3 +16,9 @@ export async function uploadFile(src: string, dst: string) {
 
   return file[0];
 }
+
+export const mimeExt = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/gif': 'gif',
+};

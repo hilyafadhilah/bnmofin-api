@@ -9,8 +9,10 @@ export namespace IdCardUploadConfig {
     'image/gif',
   ];
 
+  export const dirname = 'IdCards';
+
   export const options: Options = {
-    dest: path.join(os.tmpdir(), 'IdCards'),
+    dest: path.join(os.tmpdir(), dirname),
     limits: {
       fileSize: 5 * 1024 * 1024, // 5 MB
     },

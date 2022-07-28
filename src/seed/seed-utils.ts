@@ -40,7 +40,7 @@ export async function printInfo(dataSource: DataSource) {
     take: 5,
   })).forEach(({ user }) => printer(user));
 
-  console.info('\n--- End Seeder Info ---]\n');
+  console.info('\n--- End Seeder Info ---\n');
 
   dataSource.setOptions({ logging });
 }
