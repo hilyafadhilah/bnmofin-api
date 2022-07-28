@@ -5,14 +5,11 @@ import { Seeder } from '@jorgebodega/typeorm-seeding';
 import axios from 'axios';
 import { getStorage } from 'firebase-admin/storage';
 import { DataSource } from 'typeorm';
-import { initializeUploader } from '../../uploader';
 import { CustomerFactory } from '../factories/customer-factory';
 import { mimeExt } from '../../utils/fileupload-utils';
 
 export class CustomerSeeder extends Seeder {
   async run(dataSource: DataSource) {
-    await initializeUploader();
-
     const customers = await new CustomerFactory().createMany(200);
     const bucket = getStorage().bucket();
 

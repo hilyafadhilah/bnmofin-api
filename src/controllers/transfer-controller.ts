@@ -105,7 +105,10 @@ export class TransferController {
     await this.em.transaction(async (em) => {
       const sender = await em.findOneOrFail(Customer, {
         select: {
-          userId: true, fullname: true, balance: true, user: { username: true },
+          userId: true,
+          fullname: true,
+          balance: true,
+          user: { id: true, username: true },
         },
         relations: { user: true },
         where: { userId: user.id },
@@ -134,7 +137,12 @@ export class TransferController {
       }
 
       const receiver = await em.findOne(Customer, {
-        select: { userId: true, fullname: true, user: { username: true } },
+        select: {
+          userId: true,
+          fullname: true,
+          balance: true,
+          user: { id: true, username: true },
+        },
         relations: { user: true },
         where: { user: { username: data.username } },
       });

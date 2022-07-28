@@ -10,23 +10,20 @@ services:
       - APILAYER_KEY
       - REDIS_URL
       - TOKEN_KEY
-      - NODE_ENV=${APP_PORT:-production}
-      - APP_PORT=${APP_PORT:-3000}
+      - NODE_ENV=${PORT:-production}
+      - PORT=${PORT:-3000}
       - SEED_DATA=${SEED_DATA:-no}
       - SEED_INFO=${SEED_INFO:-no}
-      - REDIS_URL=redis://redis:6379
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DBNAME=bnmofin
+      - REDIS_URL=${REDIS_URL:-"redis://redis:6379"}
+      - DATABASE_URL=${DATABASE_URL:-"postgres://postgres:postgres@db/bnmofin"}
+      - DATABASE_SSL=${DATABASE_SSL:-no}
     ports:
-      - ${APP_PORT:-3000}:${APP_PORT:-3000}
+      - ${PORT:-3000}:${PORT:-3000}
   db:
     image: postgres:14
     restart: always
     ports:
-      - 127.0.0.1:${DB_LOCALPORT:-5433}:5432
+      - 127.0.0.1:${DATABASE_HOSTPORT:-5433}:5432
     expose:
       - 5432
     environment:
@@ -38,7 +35,7 @@ services:
   redis:
     image: redis/redis-stack-server:latest
     ports:
-      - 127.0.0.1:${REDIS_LOCALPORT:-6380}:6379
+      - 127.0.0.1:${REDIS_HOSTPORT:-6380}:6379
     expose:
       - 6379
     environment:

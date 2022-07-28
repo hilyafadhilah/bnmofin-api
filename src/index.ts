@@ -14,7 +14,7 @@ import { initializeUploader } from './uploader';
 import { seeder } from './seed';
 
 const app = express();
-const appPort = process.env.APP_PORT ?? 3030;
+const appPort = process.env.PORT ?? 3030;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
