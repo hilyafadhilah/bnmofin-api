@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import {
   FactorizedAttrs, Factory, InstanceAttribute, Subfactory,
 } from '@jorgebodega/typeorm-seeding';
+import { IdCardUploadConfig } from '../../config/fileupload-config';
 import { Customer, CustomerStatus } from '../../entities/customer';
 import { UserRole } from '../../entities/user';
 import { UserFactory } from './user-factory';
@@ -19,7 +20,7 @@ export class CustomerFactory extends Factory<Customer> {
 
     const fileName = (id: number) => {
       const ext = faker.helpers.arrayElement(['jpg', 'jpeg', 'png', 'gif']);
-      return `IdCards/${id}.${ext}`;
+      return `${IdCardUploadConfig.dirname}/${id}.${ext}`;
     };
 
     return {

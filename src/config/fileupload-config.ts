@@ -9,7 +9,7 @@ export namespace IdCardUploadConfig {
     'image/gif',
   ];
 
-  export const dirname = 'IdCards';
+  export const dirname = process.env.GOOGLE_STORAGE_PREFIX ?? 'IdCards';
 
   export const options: Options = {
     dest: path.join(os.tmpdir(), dirname),
