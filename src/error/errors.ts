@@ -37,14 +37,15 @@ export function InvalidInput({
 
 export function NotFound({
   thing,
+  thingDetailed,
   message,
-}: { thing?: string, message?: string } = {}): ErrorResponseInfo {
+}: { thing?: string, thingDetailed?: string, message?: string } = {}): ErrorResponseInfo {
   return {
     code: 404,
     name: 'NotFound',
     title: thing ? `${thing} Not Found` : 'Not Found',
     message: message ?? thing
-      ? `${thing} could not be found.`
+      ? `${thingDetailed ?? thing} could not be found.`
       : 'The requested thing could not be found.',
   };
 }

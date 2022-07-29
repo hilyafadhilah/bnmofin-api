@@ -15,7 +15,7 @@ export const redisPrefix = process.env.REDIS_PREFIX ?? 'noderedis:';
 
 export const defaultCacheExpireTime = process.env.REDIS_EX
   ? parseInt(process.env.REDIS_EX, 10)
-  : 6 * 60 * 60; // 6 hours
+  : 1 * 60 * 60; // 1 hour
 
 export function initializeCacher() {
   return client.connect();

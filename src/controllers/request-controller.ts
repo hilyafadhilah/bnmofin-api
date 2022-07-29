@@ -1,5 +1,5 @@
 import {
-  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, UseBefore,
+  Authorized, Body, CurrentUser, Get, JsonController, Param, Post, QueryParams, UseBefore,
 } from 'routing-controllers';
 import type { SelectQueryBuilder } from 'typeorm';
 import { convert } from '../api/exchange-api';
@@ -17,6 +17,7 @@ import { CollectionAppResponse } from '../models/responses/collection-apprespons
 import type { RequestAppResponse } from '../models/responses/data';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
+import { PostIntent, PostOptions } from './params/post-options';
 import { NewRequestParams, ResponseParams } from './params/request-params';
 
 type RequestSelect = Request & { response?: Omit<Response, 'request'> };
@@ -127,6 +128,9 @@ export class RequestController {
     @Body({ required: true, validate: true })
     data: NewRequestParams,
 
+    @QueryParams({ validate: true })
+    { intent }: PostOptions,
+
     @CurrentUser()
     user: AuthUser,
 
@@ -151,8 +155,10 @@ export class RequestController {
       amount,
     });
 
-    await this.em.save(request);
-    console.log(new Date(), request.created);
+    if (intent !== PostIntent.Preload) {
+      await this.em.save(request);
+    }
+
     return request;
   }
 

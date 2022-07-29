@@ -15,6 +15,7 @@ import { AuthRole, AuthUser } from '../models/auth';
 import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { PaginationParams } from './decorators/pagination-params';
 import { PaginationOptions } from './params/pagination-options';
+import { PostIntent, PostOptions } from './params/post-options';
 import { IssueTransferParams } from './params/transfer-params';
 
 @JsonController('/transfer')
@@ -92,12 +93,15 @@ export class TransferController {
     @Body({ required: true, validate: true })
     data: IssueTransferParams,
 
+    @QueryParams({ validate: true })
+    { intent }: PostOptions,
+
     @CurrentUser()
     user: AuthUser,
 
   ) {
     if (data.username === user.username) {
-      throw new AppError(InvalidInput({ thing: 'receiver' }));
+      throw new AppError(InvalidInput({ thing: 'Receiver' }));
     }
 
     let transfer: Transfer;
@@ -113,6 +117,31 @@ export class TransferController {
         relations: { user: true },
         where: { userId: user.id },
       });
+
+      const receiver = await em.findOne(Customer, {
+        select: {
+          userId: true,
+          fullname: true,
+          balance: true,
+          user: { id: true, username: true },
+        },
+        relations: { user: true },
+        where: { user: { username: data.username } },
+      });
+
+      if (!receiver) {
+        throw new AppError(NotFound({
+          thing: 'Receiver',
+          thingDetailed: `@${data.username}`,
+        }));
+      }
+
+      if (receiver.status === CustomerStatus.Unverified) {
+        throw new AppError(InvalidInput({
+          thing: 'receiver',
+          message: 'The submitted receiver has not yet been verified.',
+        }));
+      }
 
       const amount = await convert(
         data.money.amount,
@@ -136,41 +165,23 @@ export class TransferController {
         }));
       }
 
-      const receiver = await em.findOne(Customer, {
-        select: {
-          userId: true,
-          fullname: true,
-          balance: true,
-          user: { id: true, username: true },
-        },
-        relations: { user: true },
-        where: { user: { username: data.username } },
-      });
-
-      if (!receiver) {
-        throw new AppError(NotFound({ thing: 'receiver' }));
-      }
-
-      if (receiver.status === CustomerStatus.Unverified) {
-        throw new AppError(InvalidInput({
-          thing: 'receiver',
-          message: 'The submitted receiver has not yet been verified.',
-        }));
-      }
-
       transfer = em.create(Transfer, {
         amount,
         receiverId: receiver.userId,
         senderId: sender.userId,
       });
 
-      await em.save(transfer);
+      if (intent !== PostIntent.Preload) {
+        await em.save(transfer);
+      }
 
       sender.balance -= transfer.amount;
       receiver.balance += transfer.amount;
 
-      await em.save(sender);
-      await em.save(receiver);
+      if (intent !== PostIntent.Preload) {
+        await em.save(sender);
+        await em.save(receiver);
+      }
 
       transfer.sender = sender;
       transfer.receiver = receiver;
