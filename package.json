@@ -18,7 +18,8 @@
     "schema:log": "ts-node ./node_modules/typeorm/cli.js schema:log -d src/data-source.ts",
     "schema:sync": "ts-node ./node_modules/typeorm/cli.js schema:sync -d src/data-source.ts",
     "seed:run": "ts-node ./scripts/seed.ts",
-    "seed:info": "ts-node ./scripts/seed.ts --info-only"
+    "seed:info": "ts-node ./scripts/seed.ts --info-only",
+    "storage:clear": "ts-node ./scripts/clear-storage.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^7.3.0",

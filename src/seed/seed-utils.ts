@@ -1,8 +1,9 @@
 import { DataSource, LessThanOrEqual, MoreThan } from 'typeorm';
+import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { User, UserRole } from '../entities/user';
 
-export async function printInfo(dataSource: DataSource) {
+export async function printInfo() {
   const { logging } = dataSource.options;
   dataSource.setOptions({ logging: ['warn', 'error'] });
 
@@ -43,4 +44,14 @@ export async function printInfo(dataSource: DataSource) {
   console.info('\n--- End Seeder Info ---\n');
 
   dataSource.setOptions({ logging });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-shadow
+export async function configureDataSource(dataSource: DataSource) {
+  if (dataSource.isInitialized) {
+    await dataSource.destroy();
+  }
+
+  dataSource.setOptions({ dropSchema: true, synchronize: true });
+  return dataSource.initialize();
 }

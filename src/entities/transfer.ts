@@ -37,6 +37,13 @@ export class Transfer {
   @Type(() => Number)
   senderId!: number;
 
+  /**
+   * BUG: Will cause error if synchronize is running while the FK still exists
+   *      Typeorm will only delete 1 FK from entity A to B while there could be
+   *      multiple FKs from A to B (such as this).
+   *
+   * @see https://github.com/typeorm/typeorm/issues/7738
+   */
   @ManyToOne(() => Customer, { nullable: false })
   @JoinColumn({
     name: 'receiver_id',

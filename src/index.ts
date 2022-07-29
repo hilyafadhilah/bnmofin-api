@@ -51,7 +51,7 @@ const bootstrap = async () => {
 
     if (seeder.isSeed) {
       logger.info('Initializing seeder.');
-      await seeder.seed(dataSource);
+      await seeder.seed();
       logger.info('Seeder finished.');
     }
 
