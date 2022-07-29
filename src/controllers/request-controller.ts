@@ -152,6 +152,7 @@ export class RequestController {
     });
 
     await this.em.save(request);
+    console.log(new Date(), request.created);
     return request;
   }
 

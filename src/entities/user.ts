@@ -1,10 +1,11 @@
 import {
   IsEnum,
-  IsInt, IsNotEmpty, IsPositive, Length, Matches,
+  IsInt, IsPositive, Length, Matches,
 } from 'class-validator';
 import {
-  Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn,
+  Column, Entity, Index, PrimaryGeneratedColumn,
 } from 'typeorm';
+import { EntityConfig } from '../config/entity-config';
 
 export enum UserRole {
   Admin = 'admin',
@@ -21,15 +22,14 @@ export class User {
   @Column()
   @Index('uq_username', { unique: true })
   @Length(5, 25, {
-    groups: ['register', 'login', 'query'],
+    groups: ['register'],
   })
-  @Matches(/^[a-zA-Z0-9_]+$/)
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    groups: ['register'],
+  })
   username!: string;
 
   @Column()
-  @IsNotEmpty({
-    groups: ['login'],
-  })
   @Length(5, 30, {
     groups: ['register'],
   })
@@ -45,6 +45,6 @@ export class User {
   })
   role!: UserRole;
 
-  @CreateDateColumn()
+  @Column(EntityConfig.createdColumnOptions)
   created!: Date;
 }

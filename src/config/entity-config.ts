@@ -1,4 +1,5 @@
-import { ColumnCommonOptions } from 'typeorm/decorator/options/ColumnCommonOptions';
+import type { ColumnOptions } from 'typeorm';
+import type { ColumnCommonOptions } from 'typeorm/decorator/options/ColumnCommonOptions';
 import type { ColumnNumericOptions } from 'typeorm/decorator/options/ColumnNumericOptions';
 
 export namespace EntityConfig {
@@ -9,5 +10,10 @@ export namespace EntityConfig {
       from: (value: any) => parseFloat(value),
       to: (value: any) => value,
     },
+  };
+
+  export const createdColumnOptions: ColumnOptions = {
+    type: 'timestamptz',
+    default: () => 'now()',
   };
 }

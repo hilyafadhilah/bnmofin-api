@@ -4,7 +4,6 @@ import {
 } from 'class-validator';
 import {
   Column,
-  CreateDateColumn,
   Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId,
 } from 'typeorm';
 import { EntityConfig } from '../config/entity-config';
@@ -67,6 +66,6 @@ export class Transfer {
   @Type(() => Number)
   amount!: number;
 
-  @CreateDateColumn()
+  @Column(EntityConfig.createdColumnOptions)
   created!: Date;
 }

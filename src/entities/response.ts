@@ -1,6 +1,7 @@
 import {
-  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, RelationId,
+  Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, RelationId,
 } from 'typeorm';
+import { EntityConfig } from '../config/entity-config';
 import { Request } from './request';
 import { User } from './user';
 
@@ -39,6 +40,6 @@ export class Response {
   })
   responder!: User;
 
-  @CreateDateColumn()
+  @Column(EntityConfig.createdColumnOptions)
   created!: Date;
 }

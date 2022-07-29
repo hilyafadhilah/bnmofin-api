@@ -4,7 +4,7 @@ import {
   IsInstance, IsInt, IsNumber, IsPositive, ValidateNested,
 } from 'class-validator';
 import {
-  Column, CreateDateColumn, Entity, JoinColumn,
+  Column, Entity, JoinColumn,
   ManyToOne, PrimaryGeneratedColumn, RelationId,
 } from 'typeorm';
 import { EntityConfig } from '../config/entity-config';
@@ -47,6 +47,6 @@ export class Request {
   @Type(() => Number)
   amount!: number;
 
-  @CreateDateColumn()
+  @Column(EntityConfig.createdColumnOptions)
   created!: Date;
 }

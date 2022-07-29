@@ -7,6 +7,8 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import { decodeToken } from '../utils/auth-utils';
 import { AuthRole } from '../models/auth';
 import { AppError, InvalidToken, TokenExpired } from '../error';
+import { dataSource } from '../data-source';
+import { User } from '../entities/user';
 
 @Middleware({ type: 'before' })
 export class AuthMiddleware implements ExpressMiddlewareInterface {
@@ -16,7 +18,11 @@ export class AuthMiddleware implements ExpressMiddlewareInterface {
     try {
       if (header && header.startsWith('Bearer ')) {
         const token = header.replace('Bearer ', '');
-        res.locals.user = decodeToken(token);
+        const authUser = decodeToken(token);
+
+        await dataSource.manager.findOneByOrFail(User, { id: authUser.id });
+
+        res.locals.user = authUser;
       }
 
       next();

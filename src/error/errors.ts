@@ -22,9 +22,10 @@ export function InvalidInput({
   thing = 'Input',
   message,
 }: { thing?: string, message?: string } = {}): ErrorResponseInfo {
-  const m = message ?? thing
+  const m = message ?? (thing
     ? `The input provided for ${thing} is invalid.`
-    : 'The input provided is invalid.';
+    : 'The input provided is invalid.');
+  console.log(m);
 
   return {
     code: 400,
@@ -56,9 +57,9 @@ export function AlreadyExists({
     code: 409,
     name: 'AlreadyExists',
     title: thing ? `${thing} Already Exists` : 'Already Exists',
-    message: message ?? thing
+    message: message ?? (thing
       ? `${thing} already exists.`
-      : 'The requested thing already exists.',
+      : 'The requested thing already exists.'),
   };
 }
 
@@ -136,8 +137,8 @@ export function MoneyLimit({
   currency = MoneyConfig.defaultCurrency.symbol,
 }: { amount: number, limit: { min: number, max: number }, currency?: string }): ErrorResponseInfo {
   return InvalidInput({
-    thing: 'Amount',
-    message: `Submitted amount is ${moneyFormat(amount, currency)}${
+    thing: 'amount',
+    message: `Submitted amount is ${moneyFormat(amount, currency)}. ${
       amount > limit.max
         ? `Maximum limit is ${moneyFormat(limit.max, currency)}.`
         : `Minimum limit is ${moneyFormat(limit.min, currency)}.`}`,
