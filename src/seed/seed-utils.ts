@@ -7,6 +7,10 @@ export async function printInfo() {
   const { logging } = dataSource.options;
   dataSource.setOptions({ logging: ['warn', 'error'] });
 
+  if (!dataSource.isInitialized) {
+    await dataSource.initialize();
+  }
+
   const printer = (user: User) => console.info(`- ${user.username}`);
 
   console.info('\n--- Start Seeder Info ---\n');
