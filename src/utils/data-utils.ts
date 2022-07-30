@@ -1,5 +1,9 @@
 export const isTrueString = (v?: string) => Boolean(
-  v && ['YES', 'yes', 'Y', 'y', 'TRUE', 'true', 'ON', 'on', '1'].includes(v),
+  v && ['YES', 'yes', 'Y', 'y', 'TRUE', 'true', 'T', 't', 'ON', 'on', '1'].includes(v),
+);
+
+export const isFalseString = (v?: string) => Boolean(
+  v && ['NO', 'no', 'N', 'n', 'FALSE', 'false', 'F', 'f', 'OFF', 'off', '0'].includes(v),
 );
 
 export function moneyFormat(num: number, currency: string) {
