@@ -6,17 +6,18 @@ services:
       args:
         - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
     environment:
-      - GOOGLE_STORAGE_BUCKET
-      - APILAYER_KEY
-      - REDIS_URL
-      - TOKEN_KEY
-      - NODE_ENV=${PORT:-production}
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-3000}
-      - SEED_DATA=${SEED_DATA:-no}
-      - SEED_INFO=${SEED_INFO:-no}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/bnmofin}
       - DATABASE_SSL=${DATABASE_SSL:-no}
+      - GOOGLE_STORAGE_BUCKET
+      - GOOGLE_STORAGE_PREFIX
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - REDIS_EX
+      - APILAYER_KEY
+      - JWT_KEY
+      - SEED_DATA
+      - SEED_INFO
     ports:
       - ${PORT:-3000}:${PORT:-3000}
   db:

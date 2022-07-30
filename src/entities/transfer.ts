@@ -38,7 +38,7 @@ export class Transfer {
   senderId!: number;
 
   /**
-   * BUG: Will cause error if synchronize is running while the FK still exists
+   * BUG: Will cause error if synchronize is running while the FK still exists.
    *      Typeorm will only delete 1 FK from entity A to B while there could be
    *      multiple FKs from A to B (such as this).
    *

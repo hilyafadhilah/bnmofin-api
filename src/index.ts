@@ -7,7 +7,7 @@ import { controllers } from './controllers';
 import {
   interceptors, middlewares, authorizationChecker, currentUserChecker,
 } from './middlewares';
-import { dataSource } from './data-source';
+import { initializeDataSource } from './data-source';
 import { logger } from './logger';
 import { initializeCacher } from './cacher';
 import { initializeUploader } from './uploader';
@@ -42,7 +42,7 @@ const bootstrap = async () => {
     logger.info('Connected to firebase.');
 
     logger.info('Initializing DB.');
-    await dataSource.initialize();
+    await initializeDataSource();
     logger.info('Connected to DB.');
 
     logger.info('Initializing redis.');
@@ -56,7 +56,7 @@ const bootstrap = async () => {
     }
 
     if (seeder.isSeedInfo) {
-      await seeder.printInfo(dataSource);
+      await seeder.printInfo();
     }
 
     app.listen(appPort);

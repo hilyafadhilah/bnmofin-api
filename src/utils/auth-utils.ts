@@ -4,9 +4,9 @@ import type { JwtPayload } from 'jsonwebtoken';
 import { instanceToPlain } from 'class-transformer';
 import { AuthUser } from '../models/auth';
 
-console.assert(process.env.TOKEN_KEY, 'Auth token is not set.');
+console.assert(process.env.JWT_KEY, 'JWT key is not set.');
 
-const tokenKey = process.env.TOKEN_KEY!;
+const tokenKey = process.env.JWT_KEY!;
 
 export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt();

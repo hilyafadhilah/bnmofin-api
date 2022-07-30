@@ -1,4 +1,4 @@
-import { DataSource, LessThanOrEqual, MoreThan } from 'typeorm';
+import { LessThanOrEqual, MoreThan } from 'typeorm';
 import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { User, UserRole } from '../entities/user';
@@ -45,17 +45,8 @@ export async function printInfo() {
     take: 5,
   })).forEach(({ user }) => printer(user));
 
+  console.info('\nP.S. Username = Password\n');
   console.info('\n--- End Seeder Info ---\n');
 
   dataSource.setOptions({ logging });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-shadow
-export async function configureDataSource(dataSource: DataSource) {
-  if (dataSource.isInitialized) {
-    await dataSource.destroy();
-  }
-
-  dataSource.setOptions({ dropSchema: true, synchronize: true });
-  return dataSource.initialize();
 }
