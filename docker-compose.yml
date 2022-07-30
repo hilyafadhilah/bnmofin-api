@@ -18,6 +18,8 @@ services:
       - JWT_KEY
       - SEED_DATA
       - SEED_INFO
+      - LOGFILE_ERROR
+      - LOGFILE_ALL
     ports:
       - ${PORT:-3000}:${PORT:-3000}
   db:
