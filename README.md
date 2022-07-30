@@ -163,6 +163,14 @@ $ docker compose [--env-file path-to-dev-env-file] up db redis -d
 $ yarn dev
 ```
 
+## Scripts
+
+- `seed:run`: Run the seeder & seeder info, regardless of `SEED_DATA`
+  and `SEED_INFO` environment settings. Beware when running on production.
+- `seed:run`: Only run seeder info.
+- `storage:clear`: Delete all files from google storage "directory" (which can
+  be defined with `GOOGLE_STORAGE_PREFIX`)
+
 
 ## Documentation
 
