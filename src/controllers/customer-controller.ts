@@ -2,6 +2,8 @@ import {
   Authorized,
   Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParams, UploadedFile, UseBefore,
 } from 'routing-controllers';
+import { FindOptionsWhere } from 'typeorm';
+import { isNotEmptyObject } from 'class-validator';
 import { dataSource } from '../data-source';
 import { Customer, CustomerStatus } from '../entities/customer';
 import { User } from '../entities/user';
@@ -14,6 +16,8 @@ import { AuthRole, AuthUser } from '../models/auth';
 import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { nameMiddleware } from '../middlewares/name-middleware';
 import { AlreadyExists, AppError, Forbidden } from '../error';
+import { CustomerQueryParams } from './params/customer-params';
+import { makeStringWhere } from '../utils/db-utils';
 
 const customerSelect = (isAdmin: boolean) => ({
   userId: true,
@@ -90,11 +94,10 @@ export class CustomerController {
         exposeUnsetFields: false,
       },
       validate: {
-        groups: ['query'],
         skipMissingProperties: true,
       },
     })
-    query: Customer,
+    query: CustomerQueryParams,
 
     @PaginationParams()
     { skip, take }: PaginationOptions,
@@ -103,16 +106,23 @@ export class CustomerController {
     user: AuthUser,
 
   ): Promise<CollectionAppResponse<Customer>> {
-    if (user.role === AuthRole.VerifiedCustomer
-      && (query.balance !== undefined || query.status !== undefined)
-    ) {
-      throw new AppError(Forbidden());
+    let where: FindOptionsWhere<Customer>[] | undefined;
+
+    if (isNotEmptyObject(query)) {
+      if (user.role !== AuthRole.Admin) {
+        throw new AppError(Forbidden());
+      }
+
+      where = [
+        { fullname: makeStringWhere(query.fullname) },
+        { user: { username: makeStringWhere(query.username) } },
+      ];
     }
 
     const [customers, count] = await this.em.findAndCount(Customer, {
       select: customerSelect(user.role === AuthRole.Admin),
       relations: { user: true },
-      where: query,
+      where,
       order: { created: 'desc' },
       skip,
       take,

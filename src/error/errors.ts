@@ -19,18 +19,17 @@ export function ServerError({ title, message }: {
 }
 
 export function InvalidInput({
-  thing = 'Input',
+  thing,
   message,
 }: { thing?: string, message?: string } = {}): ErrorResponseInfo {
   const m = message ?? (thing
     ? `The input provided for ${thing} is invalid.`
     : 'The input provided is invalid.');
-  console.log(m);
 
   return {
     code: 400,
     name: 'InvalidInput',
-    title: `Invalid ${thing}`,
+    title: `Invalid ${thing ?? 'Input'}`,
     message: m,
   };
 }
@@ -82,7 +81,7 @@ export function Forbidden({
   message,
 }: { action?: string, title?: string, message?: string } = {}): ErrorResponseInfo {
   return {
-    code: 401,
+    code: 403,
     name: 'Forbidden',
     title,
     message: message ?? `You have insufficient permission to ${action}.`,

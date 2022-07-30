@@ -27,52 +27,52 @@ export class TransferController {
   @Authorized([AuthRole.Admin, AuthRole.VerifiedCustomer])
   async getAll(
 
-    @QueryParams({
-      transform: {
-        excludeExtraneousValues: true,
-        exposeUnsetFields: false,
-      },
-      validate: {
-        groups: ['query'],
-        skipMissingProperties: true,
-      },
-    })
-    query: Transfer,
+  // @QueryParams({
+  //   transform: {
+  //     excludeExtraneousValues: true,
+  //     exposeUnsetFields: false,
+  //   },
+  //   validate: {
+  //     groups: ['query'],
+  //     skipMissingProperties: true,
+  //   },
+  // })
+  // query: Transfer,
 
     @PaginationParams()
     { skip, take }: PaginationOptions,
 
-    @CurrentUser()
-    user: AuthUser,
+      // @CurrentUser()
+      // user: AuthUser,
   ): Promise<CollectionAppResponse<Transfer>> {
     const select: FindOptionsSelect<Transfer> = {
       sender: { userId: true, fullname: true, user: { username: true } },
       receiver: { userId: true, fullname: true, user: { username: true } },
     };
 
-    let where: Transfer | Transfer[];
+    // let where: Transfer | Transfer[];
 
-    if (user.role === AuthRole.VerifiedCustomer) {
-      if (query.receiver != null && query.sender != null) {
-        throw new AppError(Forbidden());
-      }
+    // if (user.role === AuthRole.VerifiedCustomer) {
+    //   if (query.receiver != null && query.sender != null) {
+    //     throw new AppError(Forbidden());
+    //   }
 
-      where = [];
+    //   where = [];
 
-      if (query.sender == null) {
-        where.push({ ...query, senderId: user.id });
-      }
+    //   if (query.sender == null) {
+    //     where.push({ ...query, senderId: user.id });
+    //   }
 
-      if (query.receiver == null) {
-        where.push({ ...query, receiverId: user.id });
-      }
-    } else {
-      where = { ...query };
-    }
+    //   if (query.receiver == null) {
+    //     where.push({ ...query, receiverId: user.id });
+    //   }
+    // } else {
+    //   where = { ...query };
+    // }
 
     const [transactions, count] = await this.em.findAndCount(Transfer, {
       select,
-      where: where!,
+      // where: where!,
       relations: { sender: { user: true }, receiver: { user: true } },
       order: { created: 'desc' },
       skip,
