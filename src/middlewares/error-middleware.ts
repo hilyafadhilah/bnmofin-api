@@ -3,6 +3,7 @@ import {
 } from 'routing-controllers';
 import type { Response } from 'express';
 import { EntityNotFoundError } from 'typeorm';
+import { MulterError } from 'multer';
 import { logger } from '../logger';
 import {
   AppError, InvalidInput, NotFound, ServerError, Unauthorized,
@@ -22,6 +23,11 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
         appError = new AppError(InvalidInput());
       } else if (error instanceof EntityNotFoundError) {
         appError = new AppError(NotFound({ thing: res.locals.resourceName }));
+      } else if (error?.code === 'LIMIT_FILE_SIZE') {
+        appError = new AppError(InvalidInput({
+          thing: 'File',
+          message: 'File too large.',
+        }));
       } else {
         appError = new AppError(ServerError());
       }
@@ -29,6 +35,7 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
       if (process.env.NODE_ENV !== 'production' && !appError.data) {
         appError.data = error;
         logger.error('[non-native error]', error);
+        console.log(error, error instanceof MulterError);
         // console.error(error);
       }
     }

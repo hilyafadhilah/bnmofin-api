@@ -15,7 +15,7 @@ import { PaginationParams } from './decorators/pagination-params';
 import { AuthRole, AuthUser } from '../models/auth';
 import { CollectionAppResponse } from '../models/responses/collection-appresponse';
 import { nameMiddleware } from '../middlewares/name-middleware';
-import { AlreadyExists, AppError, Forbidden } from '../error';
+import { AlreadyExists, AppError } from '../error';
 import { CustomerQueryParams } from './params/customer-params';
 import { makeStringWhere } from '../utils/db-utils';
 
@@ -85,7 +85,7 @@ export class CustomerController {
   }
 
   @Get('/')
-  @Authorized([AuthRole.VerifiedCustomer, AuthRole.Admin])
+  @Authorized(AuthRole.Admin)
   async getAll(
 
     @QueryParams({
@@ -109,10 +109,6 @@ export class CustomerController {
     let where: FindOptionsWhere<Customer>[] | undefined;
 
     if (isNotEmptyObject(query)) {
-      if (user.role !== AuthRole.Admin) {
-        throw new AppError(Forbidden());
-      }
-
       where = [
         { fullname: makeStringWhere(query.fullname) },
         { user: { username: makeStringWhere(query.username) } },
