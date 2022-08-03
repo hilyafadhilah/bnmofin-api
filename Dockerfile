@@ -23,4 +23,4 @@ RUN rm -rf tsconfig.json src node_modules
 RUN yarn cache clean; \
     yarn --production
 
-CMD ["yarn", "serve"]
+CMD ["yarn", "start"]

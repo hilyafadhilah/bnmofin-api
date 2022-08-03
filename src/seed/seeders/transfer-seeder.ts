@@ -4,6 +4,7 @@
 import { faker } from '@faker-js/faker';
 import { Seeder } from '@jorgebodega/typeorm-seeding';
 import { DataSource } from 'typeorm';
+import { MoneyConfig } from '../../config/money-config';
 import { Customer, CustomerStatus } from '../../entities/customer';
 import { TransferFactory } from '../factories/transfer-factory';
 
@@ -29,11 +30,15 @@ export class TransferSeeder extends Seeder {
             const transfer = await transferFactory.make({
               sender: customer,
               receiver: faker.helpers.arrayElement(customers),
-              amount: parseFloat(faker.finance.amount(0, customer.balance, 6)),
+              amount: parseFloat(faker.finance.amount(
+                MoneyConfig.limit.transfer.min,
+                Math.min(customer.balance, MoneyConfig.limit.transfer.max),
+                6,
+              )),
             });
 
-            transfer.sender.balance += transfer.amount;
-            transfer.receiver.balance -= transfer.amount;
+            transfer.sender.balance -= transfer.amount;
+            transfer.receiver.balance += transfer.amount;
 
             await em.save(transfer);
             await em.save(transfer.sender);
