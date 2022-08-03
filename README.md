@@ -10,13 +10,13 @@
 - Express
 - PostgreSQL
 - Redis
-- Firebase Storage
-- ApiLayer Exchange API
+- [Firebase Storage](https://firebase.google.com/docs/admin/setup)
+- ApiLayer [Exchange Rate API](https://exchangeratesapi.io/documentation/)
 
 ### Relevant Tools
 
-- TypeORM
-- TypeORM Seeding
+- [TypeORM](https://typeorm.io/) `0.3.x`
+- TypeORM Seeding (fork by jorgebodega) `5.x`
 - `jsonwebtoken`
 - `bcryptjs`
 - Axios
@@ -43,7 +43,7 @@ In this section, these values are defined as
 
 Most important environment variable for setup is `PORT`. This needs
 to be the same port the client(s) will be connecting to. Set it up to
-whatever value available on your host.
+whatever value available on your host. Default value: `3030`.
 
 ### Stack-Related
 
@@ -167,9 +167,12 @@ $ yarn dev
 
 - `seed:run`: Run the seeder & seeder info, regardless of `SEED_DATA`
   and `SEED_INFO` environment settings. Beware when running on production.
-- `seed:run`: Only run seeder info.
+- `seed:info`: Only run seeder info.
 - `storage:clear`: Delete all files from google storage "directory" (which can
   be defined with `GOOGLE_STORAGE_PREFIX`)
+
+> For these scripts to run properly the related environment variables need to
+> be set
 
 
 ## Documentation
@@ -180,7 +183,35 @@ API Docs is available on [bnmofin swagger](https://app.swaggerhub.com/apis/bnmof
 
 ![Database Schema Entity-Relationship Diagram](/docs/schema.png)
 
+## Design Patterns
+
+#### 1. Singleton
+
+Used for database & redis connection and logging mechanism (file opening, etc.).
+All of which only need to be instantiated once. The implementation does not use
+objects, but rather ES6 exports, using `const` to prevent reassignment.
+
+See: `src/data-source.ts`, `src/logger.ts`, `src/cacher.ts`
+
+#### 2. Chain of responsibility
+
+This design pattern is implemented through middlewares and interceptors. Each
+middleware deals with specific task, but all work upon the same `Request` object
+that is instantiated for each request the server receives.
+
+See: `src/middlewares/`
+
+#### 3. Factory Method
+
+This pattern is used for seeding. Creation of each entity object with random values
+is "uniform" (have specific rules) for each entity type. So the code that handles the
+seeding uses the factories and doesn't need to worry about the specific details of
+generating random entity objects.
+
+See: `src/seed/factories/`
+
 
 ## Deployment
 
-The `master` branch is deployed and live on <https://bnmofin-api.herokuapp.com>.
+The `master` branch is deployed and live on <https://bnmofin-api.herokuapp.com>
+using Heroku automatic deployment.
