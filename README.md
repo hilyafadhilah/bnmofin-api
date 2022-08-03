@@ -39,6 +39,9 @@ In this section, these values are defined as
 
 > Case insensitive
 
+Also, if you are not using docker, you need to set up the environment
+yourself. This app **does NOT use dotenv**.
+
 ### App
 
 Most important environment variable for setup is `PORT`. This needs
