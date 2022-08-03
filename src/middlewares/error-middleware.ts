@@ -3,7 +3,6 @@ import {
 } from 'routing-controllers';
 import type { Response } from 'express';
 import { EntityNotFoundError } from 'typeorm';
-import { MulterError } from 'multer';
 import { logger } from '../logger';
 import {
   AppError, InvalidInput, NotFound, ServerError, Unauthorized,
@@ -32,11 +31,11 @@ export class ErrorMiddleware implements ExpressErrorMiddlewareInterface {
         appError = new AppError(ServerError());
       }
 
+      logger.error('[non-native error]', error);
+
       if (process.env.NODE_ENV !== 'production' && !appError.data) {
         appError.data = error;
-        logger.error('[non-native error]', error);
-        console.log(error, error instanceof MulterError);
-        // console.error(error);
+        console.error(error);
       }
     }
 
